@@ -1,0 +1,77 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <h1 class="page-title">Orders Hub</h1>
+      <p class="page-sub">Pedidos entrantes en tiempo real</p>
+    </div>
+    <div class="head-badges">
+      <span class="pill amber-pill">{{ whatsappPendientes() }} WhatsApp Pendientes</span>
+      <span class="pill gray-pill font-mono">{{ pedidos().length }} pedidos hoy</span>
+    </div>
+  </header>
+
+  <div class="card table-card">
+    @if (isLoading()) {
+      <div class="skel-list">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="skeleton row-skel"></div>
+        }
+      </div>
+    } @else if (pedidos().length === 0) {
+      <div class="empty">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6ZM3 6h18M16 10a4 4 0 0 1-8 0" />
+        </svg>
+        <p>No hay pedidos por ahora. Los nuevos aparecerán aquí al instante.</p>
+      </div>
+    } @else {
+      <div class="table-scroll">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Canal</th>
+              <th>Cliente</th>
+              <th class="num">Total</th>
+              <th>Hora</th>
+              <th class="estado-col">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of pedidos(); track p.id) {
+              <tr [class.row-fresh]="isFresh(p.id)">
+                <td class="font-mono id-cell">#{{ p.id }}</td>
+                <td>
+                  @if (p.canal === 'whatsapp') {
+                    <span class="pill channel channel--wa">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="M12 2a10 10 0 0 0-8.7 15l-1.3 5 5.1-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2s-1 .3-3.4-.7-3.9-3.5-4-3.7-1-1.3-1-2.5.6-1.8.9-2 .5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.5-.3.3c-.1.1-.3.3-.1.6l.9 1.4a7 7 0 0 0 2 1.7c.3.1.5.1.7-.1l.7-.9c.2-.2.4-.2.6-.1l1.9.9c.2.1.4.2.4.3s0 .7-.2 1.2Z" />
+                      </svg>
+                      WhatsApp API
+                    </span>
+                  } @else {
+                    <span class="pill channel channel--web">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" />
+                      </svg>
+                      Web Platform
+                    </span>
+                  }
+                </td>
+                <td>{{ clienteLabel(p) }}</td>
+                <td class="num font-mono">{{ p.total | currencyCop }}</td>
+                <td class="font-mono time-cell">{{ hora(p) }}</td>
+                <td class="estado-col">
+                  <app-status-dropdown
+                    [estado]="p.estado"
+                    (changed)="onEstadoChange(p, $event)"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

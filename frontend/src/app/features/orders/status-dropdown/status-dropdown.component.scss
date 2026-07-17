@@ -1,0 +1,67 @@
+@use '../../../../styles/tokens' as *;
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.trigger {
+  cursor: pointer;
+  gap: 6px;
+  font-family: $font-sans;
+
+  .chevron {
+    transition: transform 0.16s ease;
+    &--up {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 100;
+  min-width: 180px;
+  padding: 6px;
+  background: $bg-elevated;
+  border: 1px solid $border;
+  border-radius: $radius;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  animation: fade-in-up 0.16s ease;
+
+  &__item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: $text-secondary;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.12s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: $text-primary;
+    }
+
+    &--active {
+      color: $text-primary;
+      background: rgba(255, 255, 255, 0.03);
+    }
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}

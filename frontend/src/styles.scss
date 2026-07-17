@@ -1,0 +1,258 @@
+/* ============================================================
+   ZORVA — Global Design System (dark UI)
+   ============================================================ */
+
+@use './styles/tokens' as *;
+
+/* ---------- Fonts ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: $font-sans;
+  background: $bg-base;
+  color: $text-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ---------- Scrollbars ---------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: $bg-base;
+}
+::-webkit-scrollbar-thumb {
+  background: $border;
+  border-radius: 8px;
+  border: 2px solid $bg-base;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #35353c;
+}
+
+/* ---------- Typography helpers ---------- */
+.font-mono {
+  font-family: $font-mono;
+  font-feature-settings: 'tnum';
+}
+.text-secondary {
+  color: $text-secondary;
+}
+.text-muted {
+  color: $text-muted;
+}
+
+/* ---------- Reusable utility classes ---------- */
+.card {
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: $radius;
+  padding: 20px;
+}
+
+.glass {
+  background: rgba(26, 26, 30, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid $border;
+}
+
+.gradient-accent {
+  background: $accent-gradient;
+}
+
+.text-gradient {
+  background: $accent-gradient;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glow-cyan {
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
+}
+.glow-red {
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.3);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: $radius;
+  border: 1px solid transparent;
+  font-family: $font-sans;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  user-select: none;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  color: #fff;
+  background: $accent-gradient;
+  box-shadow: 0 0 0 rgba(6, 182, 212, 0);
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.45);
+  }
+}
+
+.btn-ghost {
+  color: $text-secondary;
+  background: transparent;
+  border: 1px solid $border;
+
+  &:hover:not(:disabled) {
+    color: $text-primary;
+    border-color: #35353c;
+  }
+}
+
+.btn-danger {
+  color: #fff;
+  background: $danger;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+  }
+}
+
+/* Inputs */
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-secondary;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  background: $bg-sidebar;
+  border: 1px solid $border;
+  border-radius: $radius;
+  color: $text-primary;
+  font-family: $font-sans;
+  font-size: 14px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+
+  &::placeholder {
+    color: $text-muted;
+  }
+  &:focus {
+    outline: none;
+    border-color: $accent-cyan;
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.12);
+  }
+}
+
+textarea.input {
+  height: auto;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+select.input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 34px;
+}
+
+/* Pills / badges */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid transparent;
+}
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1e 25%, #232329 50%, #1a1a1e 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+  border-radius: $radius;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Spinner */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner-cyan {
+  border: 2px solid rgba(6, 182, 212, 0.2);
+  border-top-color: $accent-cyan;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fade-in animation for rows / toasts */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
