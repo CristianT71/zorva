@@ -1,0 +1,109 @@
+<div class="page">
+  <header class="page-head">
+    <div class="head-left">
+      <h1 class="page-title">
+        Catálogo de Inventario
+        <span class="count-badge font-mono">{{ productos().length }}</span>
+      </h1>
+      <p class="page-sub">Gestiona productos, precios y niveles de stock</p>
+    </div>
+
+    <div class="head-actions">
+      <div class="search">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <input
+          class="search__input"
+          type="text"
+          placeholder="Buscar por nombre o categoría…"
+          (input)="onSearch($event)"
+        />
+      </div>
+      <button class="btn btn-primary" (click)="openCreate()">+ Crear Nuevo Producto</button>
+    </div>
+  </header>
+
+  <div class="card table-card">
+    @if (isLoading()) {
+      <div class="skel-list">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="skeleton row-skel"></div>
+        }
+      </div>
+    } @else if (filtered().length === 0) {
+      <div class="empty">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M20 7 12 3 4 7m16 0-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+        <p>No se encontraron productos.</p>
+      </div>
+    } @else {
+      <div class="table-scroll">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre &amp; Categoría</th>
+              <th class="num">Precio</th>
+              <th>Stock</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of filtered(); track p.id) {
+              <tr>
+                <td class="font-mono id-cell">#{{ p.id }}</td>
+                <td>
+                  <div class="stacked">
+                    <span class="stacked__name">{{ p.nombre }}</span>
+                    <span class="stacked__sub">{{ categoriaLabel(p) }}</span>
+                  </div>
+                </td>
+                <td class="num font-mono">{{ p.precio | currencyCop }}</td>
+                <td>
+                  <span class="pill stock-pill" [class]="'stock-pill--' + stockLevel(p)">
+                    <span class="font-mono">{{ p.stock_actual }}</span>
+                    {{ p.unidad_medida || 'u' }}
+                  </span>
+                </td>
+                <td class="actions-col">
+                  @if (confirmingDelete() === p.id) {
+                    <div class="confirm">
+                      <span>¿Eliminar?</span>
+                      <button class="confirm__yes" (click)="confirmDelete(p)">Sí</button>
+                      <button class="confirm__no" (click)="cancelDelete()">No</button>
+                    </div>
+                  } @else {
+                    <div class="row-actions">
+                      <button class="icon-btn" (click)="openEdit(p)" title="Editar">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
+                          <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                        </svg>
+                      </button>
+                      <button class="icon-btn icon-btn--danger" (click)="askDelete(p.id)" title="Eliminar">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
+                          <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                        </svg>
+                      </button>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+@if (modalOpen()) {
+  <app-product-modal
+    [producto]="editing()"
+    [categorias]="categorias()"
+    (saved)="onSaved($event)"
+    (closed)="closeModal()"
+  />
+}

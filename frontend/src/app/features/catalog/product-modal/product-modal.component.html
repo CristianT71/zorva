@@ -1,0 +1,63 @@
+<div class="backdrop" (click)="onBackdrop($event)">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal__head">
+      <h2 class="modal__title">{{ isEdit() ? 'Editar Producto' : 'Crear Producto' }}</h2>
+      <button class="modal__close" (click)="close()" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="modal__body" novalidate>
+      <div class="field">
+        <label class="field-label">Nombre</label>
+        <input class="input" type="text" formControlName="nombre" placeholder="Nombre del producto" />
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label class="field-label">Categoría</label>
+          <select class="input" formControlName="categoria_id">
+            <option [ngValue]="null" disabled>Selecciona…</option>
+            @for (c of categorias(); track c.id) {
+              <option [ngValue]="c.id">{{ c.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Unidad de medida</label>
+          <input class="input" type="text" formControlName="unidad_medida" placeholder="ej. unidad, kg" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Precio (COP)</label>
+        <input class="input" type="number" formControlName="precio" min="0" placeholder="0" />
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label class="field-label">Stock actual</label>
+          <input class="input" type="number" formControlName="stock_actual" min="0" />
+        </div>
+        <div class="field">
+          <label class="field-label">Stock mínimo</label>
+          <input class="input" type="number" formControlName="stock_minimo" min="0" />
+        </div>
+      </div>
+
+      <div class="modal__actions">
+        <button type="button" class="btn btn-ghost" (click)="close()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
+          @if (saving()) {
+            <span class="spinner"></span>
+          } @else {
+            Guardar Producto
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
