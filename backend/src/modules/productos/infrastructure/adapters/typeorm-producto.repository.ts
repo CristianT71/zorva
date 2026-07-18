@@ -35,6 +35,10 @@ export class TypeormProductoRepository implements IProductoRepository {
       });
     }
 
+    if (filters.stockBajo) {
+      query.andWhere('producto.stockActual < producto.stockMinimo');
+    }
+
     const entities = await query.orderBy('producto.nombre', 'ASC').getMany();
     return entities.map((entity) => this.toDomain(entity));
   }
