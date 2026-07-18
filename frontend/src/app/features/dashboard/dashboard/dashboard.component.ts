@@ -131,7 +131,7 @@ export class DashboardComponent implements OnInit {
   private buildBarConfig(top: ProductoMasVendido[]): ChartConfiguration {
     const labels = top.map((t) => t.nombre);
     const data = top.map((t) => t.cantidad_vendida ?? t.total_vendido ?? t.cantidad ?? 0);
-    const colors = data.map((_, i) => (i === 0 ? '#06b6d4' : '#1e40af'));
+    const colors = data.map((_, i) => (i === 0 ? '#06b6d4' : '#7c5cff'));
 
     return {
       type: 'bar',
@@ -160,23 +160,23 @@ export class DashboardComponent implements OnInit {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#1a1a1e',
-          borderColor: '#26262b',
+          backgroundColor: '#171720',
+          borderColor: '#34344a',
           borderWidth: 1,
           titleColor: '#fff',
-          bodyColor: '#9ca3af',
+          bodyColor: '#9b9ba8',
           padding: 10,
         },
       },
       scales: {
         x: {
-          grid: { color: 'rgba(38,38,43,0.6)' },
-          ticks: { color: '#6b7280', font: { size: 11 } },
+          grid: { color: 'rgba(34,34,46,0.6)' },
+          ticks: { color: '#64646f', font: { size: 11 } },
           border: { display: false },
         },
         y: {
-          grid: { color: 'rgba(38,38,43,0.6)' },
-          ticks: { color: '#6b7280', font: { size: 11 } },
+          grid: { color: 'rgba(34,34,46,0.6)' },
+          ticks: { color: '#64646f', font: { size: 11 } },
           border: { display: false },
         },
       },

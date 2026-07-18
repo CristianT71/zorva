@@ -20,13 +20,22 @@
     <div class="chat__scroll">
       @if (messages().length === 0 && !thinking()) {
         <div class="welcome">
-          <div class="welcome__logo">
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="#fff">
-              <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" />
-            </svg>
-          </div>
+          <app-robot-mascot
+            [state]="thinking() ? 'thinking' : (hasError() ? 'error' : (hasSuccess() ? 'success' : 'idle'))"
+            tooltip="Pregúntame algo"
+            (robotClicked)="onRobotPoke()"
+          />
           <h2>Hola, soy Zorva AI</h2>
           <p>Pregúntame sobre stock, ventas o pídeme actualizar inventario.</p>
+        </div>
+      } @else {
+        <!-- Robot flotante visible durante la conversación (thinking/error reactivo) -->
+        <div class="chat__robot-anchor">
+          <app-robot-mascot
+            [state]="thinking() ? 'thinking' : (hasError() ? 'error' : (hasSuccess() ? 'success' : 'idle'))"
+            tooltip="Pregúntame algo"
+            (robotClicked)="onRobotPoke()"
+          />
         </div>
       }
 

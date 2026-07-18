@@ -10,6 +10,7 @@
   padding: 32px 36px;
   max-width: 1280px;
   margin: 0 auto;
+  animation: fade-in-up $dur-slow $ease-out;
 
   @media (max-width: 1023px) {
     padding: 72px 20px 24px; // leave room for the hamburger
@@ -65,7 +66,7 @@
 
     tbody td {
       padding: 14px;
-      border-bottom: 1px solid rgba(38, 38, 43, 0.6);
+      border-bottom: 1px solid rgba(34, 34, 46, 0.6);
       color: $text-primary;
       vertical-align: middle;
 
@@ -79,10 +80,19 @@
     }
 
     tbody tr {
-      transition: background 0.14s ease;
+      transition: background $dur-fast $ease-out;
+      animation: fade-in-up $dur-base $ease-out backwards;
+
+      // Stagger the first dozen or so rows on entry so the table feels
+      // like it settles into place rather than popping in all at once.
+      @for $i from 1 through 14 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{$i * 0.03}s;
+        }
+      }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.02);
+        background: rgba(255, 255, 255, 0.025);
       }
     }
   }
@@ -114,6 +124,7 @@
     padding: 48px 20px;
     color: $text-muted;
     text-align: center;
+    animation: fade-in $dur-slow $ease-out;
 
     svg {
       opacity: 0.5;

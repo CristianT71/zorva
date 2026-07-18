@@ -1,0 +1,339 @@
+@use '../../../../styles/tokens' as *;
+
+// Colores propios del robot que no necesariamente viven en tokens globales.
+$robot-amber: #ffb84f;  // estado "pensando"
+$robot-green: #6dffb0;  // estado "success"
+$robot-danger: #ff5470; // estado "error"
+
+:host {
+  display: inline-block;
+  position: relative;
+}
+
+.robot-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.robot-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: $accent-cyan;
+  filter: blur(18px);
+  opacity: 0.5;
+  transition: background 0.4s ease, opacity 0.4s ease;
+  animation: glowPulse 2.6s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.12); }
+}
+
+.robot {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  transform-origin: 50% 60%;
+  overflow: visible;
+}
+
+/* antena */
+.antenna-stem {
+  stroke: $accent-cyan;
+  stroke-width: 2;
+}
+.antenna-dot {
+  fill: $accent-cyan;
+  transition: fill 0.4s ease;
+  animation: antennaBlink 2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes antennaBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* cara */
+.face {
+  fill: rgba(255, 255, 255, 0.08);
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1;
+}
+
+/* ojos: se aplastan en Y para "parpadear" */
+.eye {
+  fill: $accent-cyan;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill 0.4s ease;
+  animation: blink 4.5s ease-in-out infinite;
+}
+.eye--r {
+  animation-delay: 0.05s;
+}
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+/* boca: barra tipo ecualizador, invisible en reposo */
+.mouth-bar {
+  fill: $robot-green;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: bottom;
+  transition: opacity 0.3s ease;
+}
+
+/* puntos orbitando (solo visibles en "thinking") */
+.orbit-dot {
+  fill: $robot-amber;
+  opacity: 0;
+}
+
+/* -------- ESTADO: thinking -------- */
+:host ::ng-deep .robot-wrap.thinking .robot-glow { background: $robot-amber; }
+:host ::ng-deep .robot-wrap.thinking .eye {
+  animation: none;
+  transform: scaleY(0.45);
+  fill: $robot-amber;
+}
+:host ::ng-deep .robot-wrap.thinking .antenna-dot { fill: $robot-amber; }
+:host ::ng-deep .robot-wrap.thinking .orbit-dot {
+  opacity: 1;
+  animation: orbit 1.1s linear infinite;
+}
+:host ::ng-deep .robot-wrap.thinking .orbit-dot:nth-child(3) { animation-delay: -0.37s; }
+:host ::ng-deep .robot-wrap.thinking .orbit-dot:nth-child(4) { animation-delay: -0.74s; }
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(15px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(15px) rotate(-360deg); }
+}
+
+/* -------- ESTADO: success -------- */
+:host ::ng-deep .robot-wrap.success .robot-glow { background: $robot-green; }
+:host ::ng-deep .robot-wrap.success .eye {
+  animation: none;
+  transform: scaleY(1);
+  fill: $robot-green;
+}
+:host ::ng-deep .robot-wrap.success .antenna-dot {
+  fill: $robot-green;
+  animation: antennaBlink 0.4s ease-in-out infinite;
+}
+:host ::ng-deep .robot-wrap.success .mouth-bar {
+  opacity: 1;
+  animation: talk 0.45s ease-in-out infinite alternate;
+}
+:host ::ng-deep .robot-wrap.success .mouth-bar:nth-child(6) { animation-delay: 0.1s; }
+:host ::ng-deep .robot-wrap.success .mouth-bar:nth-child(7) { animation-delay: 0.2s; }
+@keyframes talk {
+  from { transform: scaleY(0.4); }
+  to { transform: scaleY(1); }
+}
+
+/* -------- ESTADO: error -------- */
+:host ::ng-deep .robot-wrap.error .robot-glow { background: $robot-danger; }
+:host ::ng-deep .robot-wrap.error .eye {
+  animation: none;
+  fill: $robot-danger;
+  transform: scaleY(0.3);
+}
+:host ::ng-deep .robot-wrap.error .antenna-dot { fill: $robot-danger; }
+:host ::ng-deep .robot-wrap.error .robot {
+  animation: shakeOnce 0.5s ease-in-out infinite;
+}
+
+/* ============================================================
+   ESTADO IDLE "VIVO" — se mueve solo aunque no pase nada
+   ============================================================ */
+
+/* flotado sutil constante mientras está en línea, esperando */
+:host ::ng-deep .robot-wrap.idle {
+  animation: idleFloat 3.4s ease-in-out infinite;
+}
+@keyframes idleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* --- gestos puntuales, se añaden y quitan por JS cada cierto tiempo --- */
+
+/* mirar a los lados con curiosidad */
+:host ::ng-deep .robot-wrap.gesture-look .robot {
+  animation: lookAround 1.6s ease-in-out;
+}
+@keyframes lookAround {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(-9deg); }
+  45% { transform: rotate(-9deg); }
+  65% { transform: rotate(8deg); }
+  85% { transform: rotate(8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* guiño juguetón con un solo ojo */
+:host ::ng-deep .robot-wrap.gesture-wink .eye--r {
+  animation: winkOnce 0.5s ease-in-out;
+}
+@keyframes winkOnce {
+  0%, 100% { transform: scaleY(1); }
+  40%, 60% { transform: scaleY(0.1); }
+}
+
+/* pequeño salto de emoción */
+:host ::ng-deep .robot-wrap.gesture-bounce .robot {
+  animation: bounceOnce 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@keyframes bounceOnce {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-7px) scale(1.06); }
+  50% { transform: translateY(0) scale(0.96); }
+  70% { transform: translateY(-2px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* sacudida tipo "estirarse" */
+:host ::ng-deep .robot-wrap.gesture-shake .robot {
+  animation: shakeOnce 0.55s ease-in-out;
+}
+@keyframes shakeOnce {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-6deg); }
+  40% { transform: rotate(6deg); }
+  60% { transform: rotate(-4deg); }
+  80% { transform: rotate(4deg); }
+}
+
+/* antena que se estira un poco, como "revisando señal" */
+:host ::ng-deep .robot-wrap.gesture-antenna .antenna-dot {
+  animation: antennaPing 0.9s ease-in-out;
+}
+@keyframes antennaPing {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.8); }
+}
+
+/* reacción rápida al hacer click sobre el robot */
+:host ::ng-deep .robot-wrap.gesture-poke .robot {
+  animation: pokeOnce 0.4s ease-in-out;
+}
+@keyframes pokeOnce {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.85) rotate(-4deg); }
+  100% { transform: scale(1); }
+}
+
+/* ============================================================
+   EFECTO DE CLICK — chispas + onda + estrella flotante
+   ============================================================ */
+:host ::ng-deep .robot-fx {
+  position: absolute;
+  inset: -40px;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 5;
+}
+
+:host ::ng-deep .fx-ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  border: 2px solid $accent-cyan;
+  opacity: 0.85;
+  animation: rippleExpand 0.7s ease-out forwards;
+}
+@keyframes rippleExpand {
+  0% { transform: scale(0.3); opacity: 0.85; border-color: $accent-cyan; }
+  100% { transform: scale(3.4); opacity: 0; border-color: $accent-violet; }
+}
+
+:host ::ng-deep .fx-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  opacity: 1;
+  animation: sparkFly 0.6s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+@keyframes sparkFly {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2); opacity: 0; }
+}
+
+:host ::ng-deep .fx-star {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px $robot-amber);
+  animation: starFloat 0.9s ease-out forwards;
+}
+:host ::ng-deep .fx-star svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+@keyframes starFloat {
+  0% { transform: translate(-50%, -50%) scale(0.3) rotate(-20deg); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translate(-50%, calc(-50% - 42px)) scale(1.15) rotate(18deg); opacity: 0; }
+}
+
+/* ============================================================
+   TOOLTIP GLASS — "Tócame"
+   ============================================================ */
+.robot-wrap[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 6px);
+  transform: translateX(-50%) translateY(-4px) scale(0.92);
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: rgba(18, 20, 38, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid $border-glass;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: $text-primary;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+}
+.robot-wrap[data-tooltip]::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: calc(90% + 2px);
+  transform: translateX(-50%) translateY(-4px);
+  border: 5px solid transparent;
+  border-bottom-color: rgba(18, 20, 38, 0.75);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+}
+.robot-wrap[data-tooltip]:hover::after,
+.robot-wrap[data-tooltip]:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}

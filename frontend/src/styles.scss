@@ -1,5 +1,5 @@
 /* ============================================================
-   ZORVA — Global Design System (dark UI)
+   ZORVA -- Global Design System (dark, glass, motion)
    ============================================================ */
 
 @use './styles/tokens' as *;
@@ -23,12 +23,21 @@ body {
 
 body {
   font-family: $font-sans;
-  background: $bg-base;
   color: $text-primary;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 14px;
   line-height: 1.5;
+  background: $bg-base;
+  /* Faint ambient color washes -- never full-strength, just enough so the
+     black background never reads as flat/dead. Fixed so it doesn't scroll
+     away and repeat oddly on tall pages. */
+  background-image:
+    radial-gradient(ellipse 900px 600px at 8% -10%, rgba(124, 92, 255, 0.10), transparent 60%),
+    radial-gradient(ellipse 800px 500px at 100% 0%, rgba(6, 182, 212, 0.08), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 30% 100%, rgba(217, 70, 239, 0.05), transparent 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 /* ---------- Scrollbars ---------- */
@@ -37,15 +46,23 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: $bg-base;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: $border;
   border-radius: 8px;
-  border: 2px solid $bg-base;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #35353c;
+  background: $border-strong;
+  background-clip: padding-box;
+}
+
+/* ---------- Selection ---------- */
+::selection {
+  background: rgba(124, 92, 255, 0.35);
+  color: #fff;
 }
 
 /* ---------- Typography helpers ---------- */
@@ -61,18 +78,37 @@ body {
 }
 
 /* ---------- Reusable utility classes ---------- */
+
+/* Base card -- every card in the app gets a glass edge: a translucent,
+   blurred surface with a hairline top-highlight border, so panels read as
+   floating sheets over the ambient black rather than flat gray boxes. */
 .card {
-  background: $bg-card;
-  border: 1px solid $border;
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01) 45%),
+    rgba(18, 18, 24, 0.82);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  border: 1px solid $border-glass;
   border-radius: $radius;
   padding: 20px;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset, 0 16px 32px -20px rgba(0, 0, 0, 0.6);
+  transition: border-color $dur-base $ease-out, box-shadow $dur-base $ease-out,
+    transform $dur-base $ease-out;
 }
 
+/* Glass -- frosted, translucent surface for anything that should feel like
+   it's floating above the ambient background glow: sidebar, modals, the
+   login card, chat bubbles, toasts. A soft top highlight fakes a light
+   catching a beveled glass edge, and the border is a hairline gradient
+   rather than a flat single color. */
 .glass {
-  background: rgba(26, 26, 30, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid $border;
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015) 40%),
+    rgba(18, 18, 24, 0.72);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid $border-glass;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 24px 48px -16px rgba(0, 0, 0, 0.55);
 }
 
 .gradient-accent {
@@ -80,12 +116,15 @@ body {
 }
 
 .text-gradient {
-  background: $accent-gradient;
+  background: $accent-gradient-vivid;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
+.glow-violet {
+  box-shadow: 0 0 18px rgba(124, 92, 255, 0.35);
+}
 .glow-cyan {
   box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
 }
@@ -93,7 +132,7 @@ body {
   box-shadow: 0 0 16px rgba(239, 68, 68, 0.3);
 }
 
-/* Buttons */
+/* ---------- Buttons ---------- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -107,9 +146,14 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform $dur-fast $ease-out, box-shadow $dur-base $ease-out,
+    border-color $dur-base $ease-out, background $dur-base $ease-out, color $dur-base $ease-out;
   white-space: nowrap;
   user-select: none;
+
+  &:active:not(:disabled) {
+    transform: translateY(1px) scale(0.985);
+  }
 
   &:disabled {
     opacity: 0.5;
@@ -120,21 +164,26 @@ body {
 .btn-primary {
   color: #fff;
   background: $accent-gradient;
-  box-shadow: 0 0 0 rgba(6, 182, 212, 0);
+  background-size: 160% 160%;
+  background-position: 0% 50%;
+  box-shadow: 0 0 0 rgba(124, 92, 255, 0);
 
   &:hover:not(:disabled) {
-    box-shadow: 0 0 16px rgba(6, 182, 212, 0.45);
+    background-position: 100% 50%;
+    box-shadow: 0 4px 20px -2px rgba(124, 92, 255, 0.5);
+    transform: translateY(-1px);
   }
 }
 
 .btn-ghost {
   color: $text-secondary;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid $border;
 
   &:hover:not(:disabled) {
     color: $text-primary;
-    border-color: #35353c;
+    border-color: $border-strong;
+    background: rgba(255, 255, 255, 0.04);
   }
 }
 
@@ -143,11 +192,12 @@ body {
   background: $danger;
 
   &:hover:not(:disabled) {
-    box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 20px -2px rgba(239, 68, 68, 0.45);
+    transform: translateY(-1px);
   }
 }
 
-/* Inputs */
+/* ---------- Inputs ---------- */
 .field-label {
   display: block;
   font-size: 12px;
@@ -161,21 +211,23 @@ body {
   width: 100%;
   height: 42px;
   padding: 0 14px;
-  background: $bg-sidebar;
+  background: $bg-inset;
   border: 1px solid $border;
   border-radius: $radius;
   color: $text-primary;
   font-family: $font-sans;
   font-size: 14px;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  transition: border-color $dur-base $ease-out, box-shadow $dur-base $ease-out,
+    background $dur-base $ease-out;
 
   &::placeholder {
     color: $text-muted;
   }
   &:focus {
     outline: none;
-    border-color: $accent-cyan;
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.12);
+    border-color: $accent-violet;
+    background: $bg-card;
+    box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.15);
   }
 }
 
@@ -188,13 +240,13 @@ textarea.input {
 select.input {
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239b9ba8' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 34px;
 }
 
-/* Pills / badges */
+/* ---------- Pills / badges ---------- */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -205,11 +257,12 @@ select.input {
   font-weight: 600;
   line-height: 1.4;
   border: 1px solid transparent;
+  transition: border-color $dur-base $ease-out, box-shadow $dur-base $ease-out;
 }
 
-/* Skeleton loader */
+/* ---------- Skeleton loader ---------- */
 .skeleton {
-  background: linear-gradient(90deg, #1a1a1e 25%, #232329 50%, #1a1a1e 75%);
+  background: linear-gradient(90deg, $bg-card 25%, $bg-elevated 50%, $bg-card 75%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.4s ease infinite;
   border-radius: $radius;
@@ -224,7 +277,7 @@ select.input {
   }
 }
 
-/* Spinner */
+/* ---------- Spinner ---------- */
 .spinner {
   width: 18px;
   height: 18px;
@@ -245,7 +298,7 @@ select.input {
   }
 }
 
-/* Fade-in animation for rows / toasts */
+/* ---------- Shared motion vocabulary ---------- */
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -254,5 +307,50 @@ select.input {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float-blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(3%, -4%) scale(1.06);
+  }
+  66% {
+    transform: translate(-3%, 3%) scale(0.96);
+  }
+}
+
+/* Respect reduced-motion preferences: kill decorative animation, keep
+   instant state changes working. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

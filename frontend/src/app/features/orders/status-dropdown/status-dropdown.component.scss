@@ -25,11 +25,15 @@
   z-index: 100;
   min-width: 180px;
   padding: 6px;
-  background: $bg-elevated;
-  border: 1px solid $border;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015) 40%),
+    rgba(23, 23, 32, 0.9);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid $border-glass;
   border-radius: $radius;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-  animation: fade-in-up 0.16s ease;
+  animation: scale-in 0.16s $ease-out;
+  transform-origin: top right;
 
   &__item {
     width: 100%;
@@ -48,8 +52,9 @@
     transition: all 0.12s ease;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.05);
       color: $text-primary;
+      transform: translateX(2px);
     }
 
     &--active {

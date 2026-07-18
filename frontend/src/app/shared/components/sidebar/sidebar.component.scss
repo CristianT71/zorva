@@ -10,8 +10,11 @@
   left: 0;
   width: 248px;
   height: 100vh;
-  background: $bg-sidebar;
-  border-right: 1px solid $border;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01) 30%),
+    rgba(11, 11, 18, 0.78);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-right: 1px solid $border-glass;
   display: flex;
   flex-direction: column;
   padding: 20px 16px;
@@ -28,17 +31,29 @@
   &__logo {
     width: 40px;
     height: 40px;
-    border-radius: 10px;
+    border-radius: 12px;
     display: grid;
     place-items: center;
-    background: $accent-gradient;
-    box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
+    background: $accent-gradient-vivid;
+    background-size: 200% 200%;
+    box-shadow: 0 0 20px rgba(124, 92, 255, 0.45);
+    animation: brand-shift 6s ease infinite;
   }
 
   &__name {
     font-size: 20px;
     font-weight: 800;
     letter-spacing: -0.02em;
+  }
+}
+
+@keyframes brand-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
   }
 }
 
@@ -55,26 +70,46 @@
     align-items: center;
     gap: 12px;
     padding: 11px 12px;
-    border-radius: $radius;
+    border-radius: $radius-sm;
     color: $text-secondary;
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
-    transition: all 0.16s ease;
+    border: 1px solid transparent;
+    transition: background $dur-fast $ease-out, color $dur-fast $ease-out,
+      border-color $dur-fast $ease-out, transform $dur-fast $ease-out;
+
+    svg {
+      transition: stroke $dur-fast $ease-out;
+      flex-shrink: 0;
+    }
 
     &:hover {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.04);
       color: $text-primary;
+      transform: translateX(2px);
     }
 
     &--active {
       color: #fff;
-      background: rgba(6, 182, 212, 0.1);
-      border: 1px solid rgba(6, 182, 212, 0.25);
-      box-shadow: 0 0 16px rgba(6, 182, 212, 0.12);
+      background: linear-gradient(90deg, rgba(124, 92, 255, 0.16), rgba(6, 182, 212, 0.08));
+      border: 1px solid rgba(124, 92, 255, 0.3);
+      box-shadow: 0 0 20px rgba(124, 92, 255, 0.15);
 
       svg {
-        stroke: $accent-cyan;
+        stroke: $accent-violet;
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: -16px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 18px;
+        border-radius: 3px;
+        background: $accent-gradient;
       }
     }
   }
@@ -129,7 +164,7 @@
     border: 1px solid $border;
     font-weight: 700;
     font-size: 14px;
-    color: $accent-cyan;
+    color: $accent-violet;
     flex-shrink: 0;
   }
 
@@ -161,16 +196,17 @@
     place-items: center;
     width: 36px;
     height: 36px;
-    border-radius: $radius;
+    border-radius: $radius-sm;
     background: transparent;
     border: 1px solid $border;
     color: $text-secondary;
     cursor: pointer;
-    transition: all 0.16s ease;
+    transition: all $dur-fast $ease-out;
 
     &:hover {
       color: $danger;
       border-color: rgba(239, 68, 68, 0.5);
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
     }
   }
 }
@@ -190,6 +226,11 @@
   color: $text-primary;
   cursor: pointer;
   place-items: center;
+  transition: border-color $dur-fast $ease-out, transform $dur-fast $ease-out;
+
+  &:active {
+    transform: scale(0.94);
+  }
 }
 
 .overlay {
@@ -199,7 +240,7 @@
 @media (max-width: 1023px) {
   .sidebar {
     transform: translateX(-100%);
-    transition: transform 0.25s ease;
+    transition: transform 0.3s $ease-out;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
 
     &--open {
@@ -216,7 +257,8 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
     z-index: 49;
-    animation: fade-in-up 0.2s ease;
+    animation: fade-in 0.2s ease;
   }
 }

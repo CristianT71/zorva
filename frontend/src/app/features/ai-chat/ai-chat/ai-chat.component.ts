@@ -10,6 +10,7 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AiService } from '../../../core/services/ai.service';
 import { AiResponse } from '../../../core/models';
+import { RobotMascotComponent } from '../robot-mascot/robot-mascot.component';
 
 interface ChatMessage {
   role: 'user' | 'ai';
@@ -27,6 +28,7 @@ const HISTORY_KEY = 'zorva_ai_history';
 @Component({
   selector: 'app-ai-chat',
   standalone: true,
+  imports: [RobotMascotComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './ai-chat.component.html',
   styleUrl: './ai-chat.component.scss',
@@ -42,6 +44,10 @@ export class AiChatComponent implements AfterViewChecked {
   protected history = signal<HistoryItem[]>(this.readHistory());
   protected input = signal('');
   protected thinking = signal(false);
+  protected hasError = signal(false);
+  protected hasSuccess = signal(false);
+  private errorTimeout?: ReturnType<typeof setTimeout>;
+  private successTimeout?: ReturnType<typeof setTimeout>;
 
   ngAfterViewChecked(): void {
     if (this.pendingScroll) {
@@ -66,6 +72,10 @@ export class AiChatComponent implements AfterViewChecked {
     this.input.set(item.prompt);
   }
 
+  protected onRobotPoke(): void {
+    // Gancho por si quieres que el robot responda algo al hacerle click manual
+  }
+
   send(): void {
     const prompt = this.input().trim();
     if (!prompt || this.thinking()) return;
@@ -78,6 +88,7 @@ export class AiChatComponent implements AfterViewChecked {
       next: (res) => this.handleResponse(prompt, res),
       error: () => {
         this.thinking.set(false);
+        this.flagError();
         const text = 'No pude procesar tu consulta. Intenta de nuevo.';
         this.push({ role: 'ai', text, html: this.renderMarkdown(text) });
       },
@@ -89,6 +100,19 @@ export class AiChatComponent implements AfterViewChecked {
     const text = res?.respuesta || res?.response || res?.message || 'Sin respuesta.';
     this.push({ role: 'ai', text, html: this.renderMarkdown(text) });
     this.saveHistory(prompt, text);
+    this.flagSuccess();
+  }
+
+  private flagError(): void {
+    this.hasError.set(true);
+    clearTimeout(this.errorTimeout);
+    this.errorTimeout = setTimeout(() => this.hasError.set(false), 1500);
+  }
+
+  private flagSuccess(): void {
+    this.hasSuccess.set(true);
+    clearTimeout(this.successTimeout);
+    this.successTimeout = setTimeout(() => this.hasSuccess.set(false), 1200);
   }
 
   private push(msg: ChatMessage): void {

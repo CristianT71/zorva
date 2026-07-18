@@ -21,24 +21,56 @@
 }
 
 .kpi-card {
-  background: $bg-card;
-  border: 1px solid $border;
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01) 45%),
+    rgba(18, 18, 24, 0.82);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  border: 1px solid $border-glass;
   border-radius: $radius;
   padding: 22px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+  animation: fade-in-up $dur-base $ease-out backwards;
+  transition: box-shadow $dur-base $ease-out, border-color $dur-base $ease-out,
+    transform $dur-base $ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: $accent-gradient;
+    opacity: 0.7;
+  }
+
+  &:nth-child(1) {
+    animation-delay: 0.02s;
+  }
+  &:nth-child(2) {
+    animation-delay: 0.08s;
+    &::before {
+      background: linear-gradient(90deg, $accent-cyan, $accent-violet);
+    }
+  }
+  &:nth-child(3) {
+    animation-delay: 0.14s;
+    &::before {
+      background: linear-gradient(90deg, $danger, $amber);
+    }
+  }
 
   &:hover {
-    border-color: rgba(6, 182, 212, 0.4);
-    box-shadow: 0 0 24px rgba(6, 182, 212, 0.12);
-    transform: translateY(-2px);
+    border-color: rgba(124, 92, 255, 0.35);
+    box-shadow: 0 12px 32px -12px rgba(124, 92, 255, 0.25);
+    transform: translateY(-3px);
   }
 
   &--danger:hover {
     border-color: rgba(239, 68, 68, 0.4);
-    box-shadow: 0 0 24px rgba(239, 68, 68, 0.12);
+    box-shadow: 0 12px 32px -12px rgba(239, 68, 68, 0.25);
   }
 }
 
@@ -82,6 +114,12 @@
   }
 }
 
+.widget {
+  &:hover {
+    border-color: $border-strong;
+  }
+}
+
 .widget-head {
   display: flex;
   align-items: center;
@@ -114,15 +152,46 @@
   padding: 20px 20px 8px;
 }
 
+// Collapsed borders (the shared default) silently ignore border-radius on
+// individual cells, which is what flattened the danger-row corners to
+// sharp rectangles. This table only ever draws a bottom border per row, so
+// switching to separate/zero-spacing is visually identical for normal rows
+// but lets the danger row's rounded ends actually render.
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
 .danger-pill {
   color: $danger;
   background: rgba(239, 68, 68, 0.12);
   border-color: rgba(239, 68, 68, 0.4);
 }
 
-.row-danger td {
-  background: rgba(239, 68, 68, 0.06);
-  border-bottom-color: rgba(239, 68, 68, 0.15) !important;
+.row-danger {
+  td {
+    background: rgba(239, 68, 68, 0.07);
+    border-top: 1px solid rgba(239, 68, 68, 0.18);
+    border-bottom: 1px solid rgba(239, 68, 68, 0.18) !important;
+    transition: background $dur-fast $ease-out;
+
+    &:first-child {
+      border-top-left-radius: $radius-sm;
+      border-bottom-left-radius: $radius-sm;
+      border-left: 1px solid rgba(239, 68, 68, 0.18);
+      padding-left: 16px;
+    }
+    &:last-child {
+      border-top-right-radius: $radius-sm;
+      border-bottom-right-radius: $radius-sm;
+      border-right: 1px solid rgba(239, 68, 68, 0.18);
+      padding-right: 16px;
+    }
+  }
+
+  &:hover td {
+    background: rgba(239, 68, 68, 0.11);
+  }
 }
 
 .deficit-pill {
