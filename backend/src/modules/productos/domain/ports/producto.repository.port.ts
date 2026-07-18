@@ -3,6 +3,7 @@ import { Producto } from '../entities/producto.entity';
 export interface ProductoFilters {
   search?: string;
   categoriaId?: number;
+  stockBajo?: boolean;
 }
 
 export interface IProductoRepository {

@@ -1,11 +1,11 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiKeyGuard } from '../../../auth/infrastructure/adapters/api-key.guard';
 import { JwtAuthGuard } from '../../../auth/infrastructure/adapters/jwt-auth.guard';
 import { GetEstadisticasUseCase } from '../../application/use-cases/get-estadisticas.use-case';
 import { GetResumenDiarioUseCase } from '../../application/use-cases/get-resumen-diario.use-case';
 import { GetTopProductosUseCase } from '../../application/use-cases/get-top-productos.use-case';
 import { QueryEstadisticasDto } from '../dto/query-estadisticas.dto';
 
-@UseGuards(JwtAuthGuard)
 @Controller('dashboard')
 export class DashboardController {
   constructor(
@@ -14,6 +14,7 @@ export class DashboardController {
     private readonly getResumenDiarioUseCase: GetResumenDiarioUseCase,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get('estadisticas')
   async estadisticas(@Query() query: QueryEstadisticasDto) {
     const resultado = await this.getEstadisticasUseCase.execute(
@@ -25,6 +26,7 @@ export class DashboardController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('productos-mas-vendidos')
   async productosMasVendidos() {
     const productos = await this.getTopProductosUseCase.execute();
@@ -35,6 +37,7 @@ export class DashboardController {
     }));
   }
 
+  @UseGuards(ApiKeyGuard)
   @Get('resumen-diario')
   async resumenDiario() {
     const resumen = await this.getResumenDiarioUseCase.execute();

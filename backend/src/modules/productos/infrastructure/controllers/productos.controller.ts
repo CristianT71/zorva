@@ -35,6 +35,7 @@ export class ProductosController {
     const productos = await this.getProductosUseCase.execute({
       search: query.search,
       categoriaId: query.categoria_id,
+      stockBajo: query.stock_bajo,
     });
     return productos.map((producto) => this.toResponse(producto));
   }

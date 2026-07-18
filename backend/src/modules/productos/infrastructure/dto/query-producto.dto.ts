@@ -1,5 +1,5 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class QueryProductoDto {
   @IsOptional()
@@ -10,4 +10,9 @@ export class QueryProductoDto {
   @Type(() => Number)
   @IsNumber()
   categoria_id?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  stock_bajo?: boolean;
 }
