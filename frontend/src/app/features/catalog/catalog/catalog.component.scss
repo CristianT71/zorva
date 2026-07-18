@@ -19,9 +19,9 @@
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 999px;
-  color: $accent-cyan;
-  background: rgba(6, 182, 212, 0.12);
-  border: 1px solid rgba(6, 182, 212, 0.35);
+  color: $accent-violet;
+  background: rgba(124, 92, 255, 0.14);
+  border: 1px solid rgba(124, 92, 255, 0.35);
 }
 
 .head-actions {
@@ -47,19 +47,20 @@
     width: 280px;
     height: 40px;
     padding: 0 14px 0 38px;
-    background: $bg-card;
+    background: $bg-inset;
     border: 1px solid $border;
     border-radius: $radius;
     color: $text-primary;
     font-size: 14px;
+    transition: border-color $dur-base $ease-out, box-shadow $dur-base $ease-out;
 
     &::placeholder {
       color: $text-muted;
     }
     &:focus {
       outline: none;
-      border-color: $accent-cyan;
-      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.12);
+      border-color: $accent-violet;
+      box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.15);
     }
 
     @media (max-width: 560px) {
@@ -114,32 +115,36 @@
   justify-content: flex-end;
   gap: 6px;
   opacity: 0;
-  transition: opacity 0.14s ease;
+  transform: translateX(4px);
+  transition: opacity $dur-fast $ease-out, transform $dur-fast $ease-out;
 }
 
 tr:hover .row-actions {
   opacity: 1;
+  transform: translateX(0);
 }
 
 .icon-btn {
   width: 32px;
   height: 32px;
-  border-radius: $radius;
+  border-radius: $radius-sm;
   background: transparent;
   border: 1px solid $border;
   color: $text-secondary;
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: all 0.14s ease;
+  transition: all $dur-fast $ease-out;
 
   &:hover {
     color: $text-primary;
     border-color: $border-strong;
+    transform: translateY(-1px);
   }
   &--danger:hover {
     color: $danger;
     border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
   }
 }
 

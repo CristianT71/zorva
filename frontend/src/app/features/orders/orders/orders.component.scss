@@ -30,6 +30,7 @@
 .table-card {
   padding: 8px 20px;
   overflow: visible; // let the status menu escape the card
+  transition: box-shadow $dur-base $ease-out;
 }
 
 .skel-list {

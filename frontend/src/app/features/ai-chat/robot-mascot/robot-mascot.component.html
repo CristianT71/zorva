@@ -1,0 +1,32 @@
+<div
+  class="robot-wrap"
+  [attr.data-tooltip]="tooltip"
+  role="button"
+  tabindex="0"
+  aria-label="Asistente Zorva"
+>
+  <div class="robot-glow"></div>
+
+  <svg class="robot" viewBox="0 0 46 46">
+    <!-- antena -->
+    <line x1="23" y1="4" x2="23" y2="10" class="antenna-stem" />
+    <circle class="antenna-dot" cx="23" cy="4" r="3" />
+
+    <!-- cara -->
+    <rect class="face" x="8" y="10" width="30" height="26" rx="10" />
+
+    <!-- puntos orbitando (estado thinking) -->
+    <circle class="orbit-dot" cx="23" cy="23" r="2" />
+    <circle class="orbit-dot" cx="23" cy="23" r="2" />
+    <circle class="orbit-dot" cx="23" cy="23" r="2" />
+
+    <!-- ojos -->
+    <rect class="eye eye--l" x="15" y="20" width="6" height="8" rx="3" />
+    <rect class="eye eye--r" x="25" y="20" width="6" height="8" rx="3" />
+
+    <!-- boca (ecualizador, estado success) -->
+    <rect class="mouth-bar" x="16" y="30" width="3" height="5" rx="1.5" />
+    <rect class="mouth-bar" x="21.5" y="28" width="3" height="7" rx="1.5" />
+    <rect class="mouth-bar" x="27" y="30" width="3" height="5" rx="1.5" />
+  </svg>
+</div>
