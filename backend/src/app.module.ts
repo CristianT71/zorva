@@ -21,6 +21,10 @@ import { WebsocketModule } from './modules/websocket/websocket.module';
         username: configService.get<string>('DATABASE_USER'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
+        ssl:
+          configService.get<string>('DATABASE_SSL') === 'true'
+            ? { rejectUnauthorized: false }
+            : false,
         entities: [__dirname + '/**/*.typeorm-entity{.ts,.js}'],
         synchronize: true,
         logging: false,
