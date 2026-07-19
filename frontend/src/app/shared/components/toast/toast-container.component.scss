@@ -68,11 +68,11 @@
     }
   }
   &--info {
-    border-color: rgba(124, 92, 255, 0.4);
-    box-shadow: 0 8px 24px -8px rgba(124, 92, 255, 0.3);
+    border-color: rgba(37, 99, 235, 0.4);
+    box-shadow: 0 8px 24px -8px rgba(37, 99, 235, 0.3);
     .toast__dot {
       background: $accent-violet;
-      box-shadow: 0 0 8px rgba(124, 92, 255, 0.7);
+      box-shadow: 0 0 8px rgba(37, 99, 235, 0.7);
     }
   }
 }

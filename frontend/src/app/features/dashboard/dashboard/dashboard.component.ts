@@ -105,20 +105,20 @@ export class DashboardComponent implements OnInit {
         datasets: [
           {
             data,
-            borderColor: '#06b6d4',
+            borderColor: '#8a6aec',
             borderWidth: 2,
             fill: true,
             tension: 0.4,
             pointRadius: 0,
             pointHoverRadius: 4,
-            pointHoverBackgroundColor: '#06b6d4',
+            pointHoverBackgroundColor: '#8a6aec',
             backgroundColor: (ctx: ScriptableContext<'line'>) => {
               const { chart } = ctx;
               const { ctx: c, chartArea } = chart;
-              if (!chartArea) return 'rgba(6,182,212,0.15)';
+              if (!chartArea) return 'rgba(109,79,214,0.15)';
               const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-              gradient.addColorStop(0, 'rgba(6,182,212,0.35)');
-              gradient.addColorStop(1, 'rgba(6,182,212,0)');
+              gradient.addColorStop(0, 'rgba(109,79,214,0.35)');
+              gradient.addColorStop(1, 'rgba(109,79,214,0)');
               return gradient;
             },
           },
@@ -131,7 +131,7 @@ export class DashboardComponent implements OnInit {
   private buildBarConfig(top: ProductoMasVendido[]): ChartConfiguration {
     const labels = top.map((t) => t.nombre);
     const data = top.map((t) => t.cantidad_vendida ?? t.total_vendido ?? t.cantidad ?? 0);
-    const colors = data.map((_, i) => (i === 0 ? '#06b6d4' : '#7c5cff'));
+    const colors = data.map((_, i) => (i === 0 ? '#a68af5' : '#6d4fd6'));
 
     return {
       type: 'bar',
@@ -160,23 +160,23 @@ export class DashboardComponent implements OnInit {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#171720',
-          borderColor: '#34344a',
+          backgroundColor: '#0f141d',
+          borderColor: 'rgba(255,255,255,0.08)',
           borderWidth: 1,
-          titleColor: '#fff',
-          bodyColor: '#9b9ba8',
+          titleColor: '#f1f5f9',
+          bodyColor: '#94a3b8',
           padding: 10,
         },
       },
       scales: {
         x: {
-          grid: { color: 'rgba(34,34,46,0.6)' },
-          ticks: { color: '#64646f', font: { size: 11 } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: { color: '#64748b', font: { size: 11 } },
           border: { display: false },
         },
         y: {
-          grid: { color: 'rgba(34,34,46,0.6)' },
-          ticks: { color: '#64646f', font: { size: 11 } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: { color: '#64748b', font: { size: 11 } },
           border: { display: false },
         },
       },

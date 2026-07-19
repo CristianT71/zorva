@@ -1,19 +1,19 @@
-/* ============================================================
-   Reusable SCSS mixins for feature screens (page shell, tables,
-   headers, empty states). Import with:
-   @use '../../../../styles/ui' as ui;  then @include ui.page();
-   ============================================================ */
-
 @use './tokens' as *;
 
+/* ============================================================
+   Page shell -- shared container for every feature screen
+   (catalog, orders, etc). Mirrors the dashboard's own container:
+   max-w-[1280px] mx-auto px-9 py-8, with a fade-in-up entrance on
+   the header so screens feel consistent when navigating between
+   the dashboard and the rest of the app.
+   ============================================================ */
 @mixin page() {
-  padding: 32px 36px;
   max-width: 1280px;
   margin: 0 auto;
-  animation: fade-in-up $dur-slow $ease-out;
+  padding: 32px 36px;
 
-  @media (max-width: 1023px) {
-    padding: 72px 20px 24px; // leave room for the hamburger
+  @media (max-width: 900px) {
+    padding: 24px 20px;
   }
 }
 
@@ -23,18 +23,70 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 26px;
+    margin-bottom: 28px;
     flex-wrap: wrap;
+    animation: fade-in-up $dur-base $ease-out;
   }
+
   .page-title {
     font-size: 24px;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    color: $text-primary;
   }
+
   .page-sub {
-    color: $text-secondary;
     font-size: 13px;
+    color: $text-muted;
     margin-top: 4px;
+    line-height: 1.6;
+  }
+}
+
+/* Empty state -- same recipe as the dashboard's "todo al día" state:
+   centered icon + muted copy, generous vertical breathing room. */
+@mixin empty-state() {
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 56px 20px;
+    text-align: center;
+    color: $text-muted;
+    animation: fade-in $dur-base $ease-out;
+
+    svg {
+      color: $text-muted;
+      opacity: 0.7;
+    }
+
+    p {
+      font-size: 13px;
+      line-height: 1.6;
+      max-width: 320px;
+    }
+  }
+}
+
+/* Accent glow card -- the treatment the dashboard uses on its
+   "Alertas de Inventario" table card: an accent-tinted border, a
+   faint accent wash instead of the neutral glass gradient, and a
+   soft accent-tinted shadow rather than plain black. Layer this on
+   top of the base .card class for any table/list surface that
+   should read as "on brand" the way the dashboard's does. */
+@mixin card-accent-glow() {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(37, 99, 235, 0.2) !important;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
+    0 16px 32px -20px rgba(0, 0, 0, 0.6), 0 0 32px -12px rgba(37, 99, 235, 0.18);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.06), transparent 60%);
   }
 }
 
@@ -83,16 +135,21 @@
       transition: background $dur-fast $ease-out;
       animation: fade-in-up $dur-base $ease-out backwards;
 
-      // Stagger the first dozen or so rows on entry so the table feels
-      // like it settles into place rather than popping in all at once.
       @for $i from 1 through 14 {
         &:nth-child(#{$i}) {
           animation-delay: #{$i * 0.03}s;
         }
       }
 
+      /* hover con tinte de acento de marca en vez de gris genérico */
       &:hover {
-        background: rgba(255, 255, 255, 0.025);
+        background: rgba(37, 99, 235, 0.05);
+      }
+
+      /* la primera celda de cada fila gana un borde de acento sutil en hover,
+         como acento de fila activa sin necesitar blur ni transform */
+      &:hover td:first-child {
+        box-shadow: inset 2px 0 0 rgba(37, 99, 235, 0.5);
       }
     }
   }
@@ -111,26 +168,6 @@
       font-size: 12px;
       color: $text-muted;
       margin-top: 2px;
-    }
-  }
-}
-
-@mixin empty-state() {
-  .empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 48px 20px;
-    color: $text-muted;
-    text-align: center;
-    animation: fade-in $dur-slow $ease-out;
-
-    svg {
-      opacity: 0.5;
-    }
-    p {
-      font-size: 13px;
     }
   }
 }

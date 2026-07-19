@@ -19,6 +19,16 @@
   padding: 24px 16px;
   overflow-y: auto;
 
+  /* scrollbar sutil, en línea con el resto del glass UI */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(37, 99, 235, 0.25) transparent;
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(37, 99, 235, 0.25);
+    border-radius: 10px;
+    &:hover { background: rgba(37, 99, 235, 0.4); }
+  }
+
   @media (max-width: 1023px) {
     display: none;
   }
@@ -44,7 +54,9 @@
   }
 
   &__item {
+    position: relative;
     padding: 10px 12px;
+    padding-left: 16px;
     border-radius: $radius-sm;
     font-size: 13px;
     color: $text-secondary;
@@ -55,11 +67,29 @@
     border: 1px solid transparent;
     transition: all $dur-fast $ease-out;
 
+    /* barrita de acento a la izquierda, aparece en hover — refuerzo visual sin blur */
+    &::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%) scaleY(0);
+      width: 2px;
+      height: 60%;
+      border-radius: 2px;
+      background: $accent-gradient-vivid;
+      transition: transform $dur-fast $ease-out;
+    }
+
     &:hover {
-      background: rgba(124, 92, 255, 0.08);
+      background: rgba(37, 99, 235, 0.08);
       color: $text-primary;
-      border-color: rgba(124, 92, 255, 0.25);
+      border-color: rgba(37, 99, 235, 0.25);
       transform: translateX(2px);
+
+      &::before {
+        transform: translateY(-50%) scaleY(1);
+      }
     }
   }
 }
@@ -78,6 +108,14 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(37, 99, 235, 0.25) transparent;
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(37, 99, 235, 0.25);
+      border-radius: 10px;
+    }
 
     @media (max-width: 1023px) {
       padding-top: 72px;
@@ -108,7 +146,7 @@
     place-items: center;
     background: $accent-gradient-vivid;
     background-size: 200% 200%;
-    box-shadow: 0 0 28px rgba(124, 92, 255, 0.45);
+    box-shadow: 0 0 28px rgba(37, 99, 235, 0.45);
     animation: brand-shift 6s ease infinite;
   }
 
@@ -124,13 +162,8 @@
 }
 
 @keyframes brand-shift {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 /* ---------- Bubbles ---------- */
@@ -148,7 +181,7 @@
     color: #fff;
     background: $accent-gradient;
     border-bottom-right-radius: 4px;
-    box-shadow: 0 4px 20px -4px rgba(124, 92, 255, 0.4);
+    box-shadow: 0 4px 20px -4px rgba(37, 99, 235, 0.4);
   }
 
   &--ai {
@@ -157,9 +190,10 @@
       rgba(18, 18, 24, 0.85);
     backdrop-filter: blur(16px) saturate(140%);
     -webkit-backdrop-filter: blur(16px) saturate(140%);
-    border: 1px solid rgba(217, 70, 239, 0.18);
+    border: 1px solid rgba(56, 189, 248, 0.18);
     border-bottom-left-radius: 4px;
     color: $text-primary;
+    /* estático: sin transform ni box-shadow animado, así que el blur nunca da glitch */
 
     :where(strong) {
       color: #fff;
@@ -193,16 +227,8 @@
 }
 
 @keyframes bounce {
-  0%,
-  60%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.5;
-  }
-  30% {
-    transform: translateY(-6px);
-    opacity: 1;
-  }
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-6px); opacity: 1; }
 }
 
 /* ---------- Composer ---------- */
@@ -255,7 +281,7 @@
     &:focus {
       outline: none;
       border-color: $accent-violet;
-      box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.15);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
     }
   }
 
@@ -266,16 +292,18 @@
     border-radius: $radius;
     border: none;
     background: $accent-gradient;
+    background-size: 200% 200%;
     color: #fff;
     display: grid;
     place-items: center;
     cursor: pointer;
     transition: box-shadow $dur-fast $ease-out, opacity $dur-fast $ease-out,
-      transform $dur-fast $ease-out;
+      transform $dur-fast $ease-out, background-position $dur-slow $ease-out;
 
     &:hover:not(:disabled) {
-      box-shadow: 0 4px 20px -2px rgba(124, 92, 255, 0.5);
+      box-shadow: 0 4px 20px -2px rgba(37, 99, 235, 0.5);
       transform: translateY(-1px);
+      background-position: 100% 50%;
     }
     &:active:not(:disabled) {
       transform: translateY(0) scale(0.95);
@@ -284,5 +312,17 @@
       opacity: 0.4;
       cursor: not-allowed;
     }
+  }
+}
+
+/* ---------- Entrada escalonada de mensajes ---------- */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

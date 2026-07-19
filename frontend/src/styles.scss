@@ -4,6 +4,14 @@
 
 @use './styles/tokens' as *;
 
+/* Tailwind: base/components first, utilities go at the very bottom of this
+   file (see end of file) so `class="..."` utilities can still win over the
+   legacy .card/.btn/.input rules below while both systems coexist during
+   the migration. Preflight is disabled in tailwind.config.js -- the reset
+   right below already does that job. */
+@tailwind base;
+@tailwind components;
+
 /* ---------- Fonts ---------- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
@@ -28,16 +36,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-size: 14px;
   line-height: 1.5;
-  background: $bg-base;
-  /* Faint ambient color washes -- never full-strength, just enough so the
-     black background never reads as flat/dead. Fixed so it doesn't scroll
-     away and repeat oddly on tall pages. */
-  background-image:
-    radial-gradient(ellipse 900px 600px at 8% -10%, rgba(124, 92, 255, 0.10), transparent 60%),
-    radial-gradient(ellipse 800px 500px at 100% 0%, rgba(6, 182, 212, 0.08), transparent 60%),
-    radial-gradient(ellipse 700px 500px at 30% 100%, rgba(217, 70, 239, 0.05), transparent 60%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  /* Flat deep blue-black -- the design system reserves gradients for a
+     single promo/highlight card, so the page background stays solid. */
+  background: #0a0e17;
 }
 
 /* ---------- Scrollbars ---------- */
@@ -61,7 +62,7 @@ body {
 
 /* ---------- Selection ---------- */
 ::selection {
-  background: rgba(124, 92, 255, 0.35);
+  background: rgba(37, 99, 235, 0.35);
   color: #fff;
 }
 
@@ -123,7 +124,7 @@ body {
 }
 
 .glow-violet {
-  box-shadow: 0 0 18px rgba(124, 92, 255, 0.35);
+  box-shadow: 0 0 18px rgba(37, 99, 235, 0.35);
 }
 .glow-cyan {
   box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
@@ -166,11 +167,11 @@ body {
   background: $accent-gradient;
   background-size: 160% 160%;
   background-position: 0% 50%;
-  box-shadow: 0 0 0 rgba(124, 92, 255, 0);
+  box-shadow: 0 0 0 rgba(37, 99, 235, 0);
 
   &:hover:not(:disabled) {
     background-position: 100% 50%;
-    box-shadow: 0 4px 20px -2px rgba(124, 92, 255, 0.5);
+    box-shadow: 0 4px 20px -2px rgba(37, 99, 235, 0.5);
     transform: translateY(-1px);
   }
 }
@@ -227,7 +228,7 @@ body {
     outline: none;
     border-color: $accent-violet;
     background: $bg-card;
-    box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   }
 }
 
@@ -343,6 +344,19 @@ select.input {
   }
 }
 
+/* Shared by the sidebar brand mark and the login brand mark -- kept
+   global (rather than duplicated per-component) so it's available
+   regardless of which route/bundle is currently loaded. */
+@keyframes brand-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
 /* Respect reduced-motion preferences: kill decorative animation, keep
    instant state changes working. */
 @media (prefers-reduced-motion: reduce) {
@@ -354,3 +368,8 @@ select.input {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------- Tailwind utilities ---------- */
+/* Kept last so utility classes override the legacy rules above wherever a
+   component (like the dashboard) has already migrated to Tailwind. */
+@tailwind utilities;
