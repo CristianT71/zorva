@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: '/api',
-  wsUrl: '',
+  apiUrl: 'https://zorva-production.up.railway.app/api',
+  wsUrl: 'https://zorva-production.up.railway.app',
 };
