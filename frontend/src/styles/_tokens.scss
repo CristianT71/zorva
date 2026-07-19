@@ -3,7 +3,7 @@
    Import into any component with: @use '../../../styles/tokens' as *;
    ------------------------------------------------------------
    Dark-first palette: true blacks stay dominant, but every
-   background layer carries a faint violet/indigo undertone
+   background layer carries a faint blue/indigo undertone
    instead of flat gray -- that's what keeps "dark" from
    reading as "just black and white". Color is reserved for
    accents, status, and glow -- never for large surfaces.
@@ -22,13 +22,13 @@ $border-strong: #34344a;
 $border-glass: rgba(255, 255, 255, 0.08);
 
 // Accents -- a small, deliberate palette used for specific jobs:
-// violet = primary/brand actions, cyan = data & links, fuchsia = AI/highlight
-$accent-violet: #7c5cff;
-$accent-violet-dim: #5b3fd9;
+// blue = primary/brand actions, cyan = data & links, sky = AI/highlight
+$accent-violet: #2563eb;
+$accent-violet-dim: #1d4ed8;
 $accent-cyan: #06b6d4;
-$accent-fuchsia: #d946ef;
-$accent-gradient: linear-gradient(135deg, #7c5cff 0%, #06b6d4 100%);
-$accent-gradient-vivid: linear-gradient(135deg, #8b6bff 0%, #06b6d4 55%, #d946ef 100%);
+$accent-fuchsia: #38bdf8;
+$accent-gradient: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+$accent-gradient-vivid: linear-gradient(135deg, #3b82f6 0%, #06b6d4 55%, #38bdf8 100%);
 
 // Legacy alias kept for older component references
 $accent-blue: $accent-violet;
