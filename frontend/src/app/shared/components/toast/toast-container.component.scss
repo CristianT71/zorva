@@ -1,0 +1,78 @@
+@use '../../../../styles/tokens' as *;
+
+.toast-stack {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 240px;
+  max-width: 360px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015) 40%),
+    rgba(18, 18, 24, 0.85);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid $border-glass;
+  border-radius: $radius;
+  color: $text-primary;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  animation: fade-in-up $dur-base $ease-out;
+  transition: transform $dur-fast $ease-out, opacity $dur-fast $ease-out;
+
+  &:hover {
+    transform: translateX(-2px);
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &--success {
+    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.3);
+    .toast__dot {
+      background: $emerald;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+    }
+  }
+  &--error {
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: 0 8px 24px -8px rgba(239, 68, 68, 0.35);
+    .toast__dot {
+      background: $danger;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+    }
+  }
+  &--amber {
+    border-color: rgba(245, 158, 11, 0.4);
+    box-shadow: 0 8px 24px -8px rgba(245, 158, 11, 0.35);
+    .toast__dot {
+      background: $amber;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+    }
+  }
+  &--info {
+    border-color: rgba(124, 92, 255, 0.4);
+    box-shadow: 0 8px 24px -8px rgba(124, 92, 255, 0.3);
+    .toast__dot {
+      background: $accent-violet;
+      box-shadow: 0 0 8px rgba(124, 92, 255, 0.7);
+    }
+  }
+}

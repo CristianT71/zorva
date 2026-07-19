@@ -1,0 +1,83 @@
+@use '../../../../styles/tokens' as *;
+@use '../../../../styles/ui' as ui;
+
+.page {
+  @include ui.page();
+}
+@include ui.page-head();
+@include ui.data-table();
+@include ui.empty-state();
+
+.head-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.amber-pill {
+  color: $amber;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.gray-pill {
+  color: $text-secondary;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: $border;
+}
+
+.table-card {
+  padding: 8px 20px;
+  overflow: visible; // let the status menu escape the card
+  transition: box-shadow $dur-base $ease-out;
+}
+
+.skel-list {
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.row-skel {
+  height: 48px;
+}
+
+/* ---------- Channel badges ---------- */
+.channel {
+  gap: 6px;
+
+  &--wa {
+    color: $emerald;
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+  &--web {
+    color: $blue;
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+}
+
+.time-cell {
+  color: $text-secondary;
+}
+
+.estado-col {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ---------- Fresh row animation ---------- */
+.row-fresh td {
+  animation: fresh-glow 4s ease;
+}
+
+@keyframes fresh-glow {
+  0% {
+    background: rgba(245, 158, 11, 0.18);
+  }
+  100% {
+    background: transparent;
+  }
+}

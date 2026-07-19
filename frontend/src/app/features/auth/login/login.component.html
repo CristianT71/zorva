@@ -1,0 +1,81 @@
+<div class="login-viewport">
+  <div class="blob blob--pearl" aria-hidden="true"></div>
+  <div class="blob blob--smoke" aria-hidden="true"></div>
+  <div class="blob blob--haze" aria-hidden="true"></div>
+
+  <div class="login-card glass">
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand__logo">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="#fff">
+          <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" />
+        </svg>
+      </div>
+      <span class="brand__name">Zorva</span>
+    </div>
+
+    <p class="subtitle">Panel administrativo · Accede a tu centro de control</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <!-- Email -->
+      <div class="field">
+        <label class="field-label" for="email">Email</label>
+        <input
+          id="email"
+          class="input"
+          type="email"
+          formControlName="email"
+          placeholder="admin@zorva.com"
+          autocomplete="username"
+        />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <span class="field-error">Ingresa un email válido.</span>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <label class="field-label" for="password">Contraseña</label>
+        <div class="password-wrap">
+          <input
+            id="password"
+            class="input"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
+          <button type="button" class="eye" (click)="togglePassword()" tabindex="-1" aria-label="Mostrar contraseña">
+            @if (showPassword()) {
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22" />
+              </svg>
+            } @else {
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            }
+          </button>
+        </div>
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <span class="field-error">Mínimo 6 caracteres.</span>
+        }
+      </div>
+
+      <button type="submit" class="btn btn-primary cta" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+          <span class="spinner"></span>
+        } @else {
+          Authenticate &amp; Enter Dashboard
+        }
+      </button>
+
+      @if (errorMsg()) {
+        <div class="error-banner">{{ errorMsg() }}</div>
+      }
+    </form>
+
+    <p class="secure">Protegido por Zorva Security Layer v2.4</p>
+  </div>
+</div>

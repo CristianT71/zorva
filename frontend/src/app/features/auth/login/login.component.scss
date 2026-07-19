@@ -1,0 +1,168 @@
+@use '../../../../styles/tokens' as *;
+
+.login-viewport {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: $bg-base;
+  overflow: hidden;
+}
+
+/* Soft floating light blobs -- the one deliberate flourish on this screen.
+   Blurred heavily so they read as ambient moonlight, not shapes, and drift
+   slowly so the page never feels static without being distracting. Kept to
+   grays and white on purpose: it contrasts cleanly with the black backdrop
+   without competing with the app's own violet/cyan accent system. */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  pointer-events: none;
+  animation: float-blob 16s ease-in-out infinite;
+
+  &--pearl {
+    width: 480px;
+    height: 480px;
+    top: -120px;
+    left: -100px;
+    background: #e4e4e9;
+  }
+  &--smoke {
+    width: 420px;
+    height: 420px;
+    bottom: -140px;
+    right: -100px;
+    background: #8b8b96;
+    animation-delay: -5s;
+  }
+  &--haze {
+    width: 340px;
+    height: 340px;
+    bottom: 8%;
+    left: 6%;
+    background: #ffffff;
+    opacity: 0.14;
+    animation-delay: -10s;
+  }
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 36px;
+  border-radius: $radius-lg;
+  animation: scale-in $dur-slow $ease-out;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: center;
+
+  &__logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: $accent-gradient-vivid;
+    background-size: 200% 200%;
+    box-shadow: 0 0 24px rgba(124, 92, 255, 0.5);
+    animation: brand-shift 6s ease infinite;
+  }
+
+  &__name {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+}
+
+@keyframes brand-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.subtitle {
+  text-align: center;
+  color: $text-secondary;
+  font-size: 13px;
+  margin: 14px 0 28px;
+}
+
+.field {
+  margin-bottom: 18px;
+}
+
+.field-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: $danger;
+  animation: fade-in $dur-fast $ease-out;
+}
+
+.password-wrap {
+  position: relative;
+
+  .input {
+    padding-right: 44px;
+  }
+
+  .eye {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: none;
+    color: $text-muted;
+    cursor: pointer;
+    transition: color $dur-fast $ease-out;
+
+    &:hover {
+      color: $text-secondary;
+    }
+  }
+}
+
+.cta {
+  width: 100%;
+  height: 46px;
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+.error-banner {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: $radius;
+  font-size: 13px;
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.15);
+  animation: fade-in-up $dur-base $ease-out;
+}
+
+.secure {
+  text-align: center;
+  margin-top: 26px;
+  font-size: 11px;
+  color: $text-muted;
+}

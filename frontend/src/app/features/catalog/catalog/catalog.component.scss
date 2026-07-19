@@ -1,0 +1,181 @@
+@use '../../../../styles/tokens' as *;
+@use '../../../../styles/ui' as ui;
+
+.page {
+  @include ui.page();
+}
+@include ui.page-head();
+@include ui.data-table();
+@include ui.empty-state();
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.count-badge {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: $accent-violet;
+  background: rgba(124, 92, 255, 0.14);
+  border: 1px solid rgba(124, 92, 255, 0.35);
+}
+
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  svg {
+    position: absolute;
+    left: 12px;
+    color: $text-muted;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 280px;
+    height: 40px;
+    padding: 0 14px 0 38px;
+    background: $bg-inset;
+    border: 1px solid $border;
+    border-radius: $radius;
+    color: $text-primary;
+    font-size: 14px;
+    transition: border-color $dur-base $ease-out, box-shadow $dur-base $ease-out;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+    &:focus {
+      outline: none;
+      border-color: $accent-violet;
+      box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.15);
+    }
+
+    @media (max-width: 560px) {
+      width: 100%;
+    }
+  }
+}
+
+.table-card {
+  padding: 8px 20px;
+}
+
+.skel-list {
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.row-skel {
+  height: 48px;
+}
+
+/* ---------- Stock pills ---------- */
+.stock-pill {
+  gap: 4px;
+
+  &--ok {
+    color: $emerald;
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+  &--low {
+    color: $amber;
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.4);
+  }
+  &--out {
+    color: $danger;
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.45);
+  }
+}
+
+/* ---------- Row actions ---------- */
+.actions-col {
+  width: 120px;
+  text-align: right;
+}
+
+.row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: opacity $dur-fast $ease-out, transform $dur-fast $ease-out;
+}
+
+tr:hover .row-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-sm;
+  background: transparent;
+  border: 1px solid $border;
+  color: $text-secondary;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all $dur-fast $ease-out;
+
+  &:hover {
+    color: $text-primary;
+    border-color: $border-strong;
+    transform: translateY(-1px);
+  }
+  &--danger:hover {
+    color: $danger;
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+  }
+}
+
+.confirm {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 12px;
+  color: $text-secondary;
+
+  button {
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid $border;
+    background: transparent;
+  }
+
+  &__yes {
+    color: #fff;
+    background: $danger !important;
+    border-color: $danger !important;
+  }
+  &__no {
+    color: $text-secondary;
+    &:hover {
+      color: $text-primary;
+    }
+  }
+}

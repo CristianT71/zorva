@@ -1,0 +1,264 @@
+@use '../../../../styles/tokens' as *;
+
+:host {
+  display: block;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 248px;
+  height: 100vh;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01) 30%),
+    rgba(11, 11, 18, 0.78);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-right: 1px solid $border-glass;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 16px;
+  z-index: 50;
+}
+
+/* ---------- Brand ---------- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px 22px;
+
+  &__logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: $accent-gradient-vivid;
+    background-size: 200% 200%;
+    box-shadow: 0 0 20px rgba(124, 92, 255, 0.45);
+    animation: brand-shift 6s ease infinite;
+  }
+
+  &__name {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+}
+
+@keyframes brand-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ---------- Nav ---------- */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+
+  &__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: $radius-sm;
+    color: $text-secondary;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: background $dur-fast $ease-out, color $dur-fast $ease-out,
+      border-color $dur-fast $ease-out, transform $dur-fast $ease-out;
+
+    svg {
+      transition: stroke $dur-fast $ease-out;
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: $text-primary;
+      transform: translateX(2px);
+    }
+
+    &--active {
+      color: #fff;
+      background: linear-gradient(90deg, rgba(124, 92, 255, 0.16), rgba(6, 182, 212, 0.08));
+      border: 1px solid rgba(124, 92, 255, 0.3);
+      box-shadow: 0 0 20px rgba(124, 92, 255, 0.15);
+
+      svg {
+        stroke: $accent-violet;
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: -16px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 18px;
+        border-radius: 3px;
+        background: $accent-gradient;
+      }
+    }
+  }
+
+  &__pulse {
+    margin-left: auto;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: $danger;
+    box-shadow: 0 0 0 rgba(239, 68, 68, 0.6);
+    animation: pulse-red 1.6s ease-out infinite;
+  }
+}
+
+@keyframes pulse-red {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+/* ---------- Footer / user ---------- */
+.foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px 4px;
+  border-top: 1px solid $border;
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  &__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: $bg-elevated;
+    border: 1px solid $border;
+    font-weight: 700;
+    font-size: 14px;
+    color: $accent-violet;
+    flex-shrink: 0;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__email {
+    font-size: 11px;
+    color: $text-muted;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__logout {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-sm;
+    background: transparent;
+    border: 1px solid $border;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: all $dur-fast $ease-out;
+
+    &:hover {
+      color: $danger;
+      border-color: rgba(239, 68, 68, 0.5);
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+    }
+  }
+}
+
+/* ---------- Mobile ---------- */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 60;
+  width: 42px;
+  height: 42px;
+  border-radius: $radius;
+  background: $bg-card;
+  border: 1px solid $border;
+  color: $text-primary;
+  cursor: pointer;
+  place-items: center;
+  transition: border-color $dur-fast $ease-out, transform $dur-fast $ease-out;
+
+  &:active {
+    transform: scale(0.94);
+  }
+}
+
+.overlay {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s $ease-out;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+
+    &--open {
+      transform: translateX(0);
+    }
+  }
+
+  .hamburger {
+    display: grid;
+  }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 49;
+    animation: fade-in 0.2s ease;
+  }
+}

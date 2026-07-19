@@ -1,0 +1,25 @@
+<div class="dropdown">
+  <button
+    class="trigger pill"
+    [style.color]="current().color"
+    [style.background]="current().color + '1f'"
+    [style.border-color]="current().color + '55'"
+    (click)="toggle()"
+  >
+    {{ current().label }}
+    <svg class="chevron" [class.chevron--up]="open()" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  </button>
+
+  @if (open()) {
+    <div class="menu">
+      @for (opt of options; track opt.value) {
+        <button class="menu__item" (click)="select(opt.value)" [class.menu__item--active]="opt.value === estado()">
+          <span class="menu__dot" [style.background]="opt.color"></span>
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+  }
+</div>

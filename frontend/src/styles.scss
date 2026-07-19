@@ -1,0 +1,356 @@
+/* ============================================================
+   ZORVA -- Global Design System (dark, glass, motion)
+   ============================================================ */
+
+@use './styles/tokens' as *;
+
+/* ---------- Fonts ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: $font-sans;
+  color: $text-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+  line-height: 1.5;
+  background: $bg-base;
+  /* Faint ambient color washes -- never full-strength, just enough so the
+     black background never reads as flat/dead. Fixed so it doesn't scroll
+     away and repeat oddly on tall pages. */
+  background-image:
+    radial-gradient(ellipse 900px 600px at 8% -10%, rgba(124, 92, 255, 0.10), transparent 60%),
+    radial-gradient(ellipse 800px 500px at 100% 0%, rgba(6, 182, 212, 0.08), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 30% 100%, rgba(217, 70, 239, 0.05), transparent 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* ---------- Scrollbars ---------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: $border;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: $border-strong;
+  background-clip: padding-box;
+}
+
+/* ---------- Selection ---------- */
+::selection {
+  background: rgba(124, 92, 255, 0.35);
+  color: #fff;
+}
+
+/* ---------- Typography helpers ---------- */
+.font-mono {
+  font-family: $font-mono;
+  font-feature-settings: 'tnum';
+}
+.text-secondary {
+  color: $text-secondary;
+}
+.text-muted {
+  color: $text-muted;
+}
+
+/* ---------- Reusable utility classes ---------- */
+
+/* Base card -- every card in the app gets a glass edge: a translucent,
+   blurred surface with a hairline top-highlight border, so panels read as
+   floating sheets over the ambient black rather than flat gray boxes. */
+.card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01) 45%),
+    rgba(18, 18, 24, 0.82);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  border: 1px solid $border-glass;
+  border-radius: $radius;
+  padding: 20px;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset, 0 16px 32px -20px rgba(0, 0, 0, 0.6);
+  transition: border-color $dur-base $ease-out, box-shadow $dur-base $ease-out,
+    transform $dur-base $ease-out;
+}
+
+/* Glass -- frosted, translucent surface for anything that should feel like
+   it's floating above the ambient background glow: sidebar, modals, the
+   login card, chat bubbles, toasts. A soft top highlight fakes a light
+   catching a beveled glass edge, and the border is a hairline gradient
+   rather than a flat single color. */
+.glass {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015) 40%),
+    rgba(18, 18, 24, 0.72);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid $border-glass;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 24px 48px -16px rgba(0, 0, 0, 0.55);
+}
+
+.gradient-accent {
+  background: $accent-gradient;
+}
+
+.text-gradient {
+  background: $accent-gradient-vivid;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glow-violet {
+  box-shadow: 0 0 18px rgba(124, 92, 255, 0.35);
+}
+.glow-cyan {
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
+}
+.glow-red {
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.3);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: $radius;
+  border: 1px solid transparent;
+  font-family: $font-sans;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform $dur-fast $ease-out, box-shadow $dur-base $ease-out,
+    border-color $dur-base $ease-out, background $dur-base $ease-out, color $dur-base $ease-out;
+  white-space: nowrap;
+  user-select: none;
+
+  &:active:not(:disabled) {
+    transform: translateY(1px) scale(0.985);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  color: #fff;
+  background: $accent-gradient;
+  background-size: 160% 160%;
+  background-position: 0% 50%;
+  box-shadow: 0 0 0 rgba(124, 92, 255, 0);
+
+  &:hover:not(:disabled) {
+    background-position: 100% 50%;
+    box-shadow: 0 4px 20px -2px rgba(124, 92, 255, 0.5);
+    transform: translateY(-1px);
+  }
+}
+
+.btn-ghost {
+  color: $text-secondary;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid $border;
+
+  &:hover:not(:disabled) {
+    color: $text-primary;
+    border-color: $border-strong;
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.btn-danger {
+  color: #fff;
+  background: $danger;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 4px 20px -2px rgba(239, 68, 68, 0.45);
+    transform: translateY(-1px);
+  }
+}
+
+/* ---------- Inputs ---------- */
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-secondary;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  background: $bg-inset;
+  border: 1px solid $border;
+  border-radius: $radius;
+  color: $text-primary;
+  font-family: $font-sans;
+  font-size: 14px;
+  transition: border-color $dur-base $ease-out, box-shadow $dur-base $ease-out,
+    background $dur-base $ease-out;
+
+  &::placeholder {
+    color: $text-muted;
+  }
+  &:focus {
+    outline: none;
+    border-color: $accent-violet;
+    background: $bg-card;
+    box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.15);
+  }
+}
+
+textarea.input {
+  height: auto;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+select.input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239b9ba8' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 34px;
+}
+
+/* ---------- Pills / badges ---------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  transition: border-color $dur-base $ease-out, box-shadow $dur-base $ease-out;
+}
+
+/* ---------- Skeleton loader ---------- */
+.skeleton {
+  background: linear-gradient(90deg, $bg-card 25%, $bg-elevated 50%, $bg-card 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+  border-radius: $radius;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- Spinner ---------- */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner-cyan {
+  border: 2px solid rgba(6, 182, 212, 0.2);
+  border-top-color: $accent-cyan;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Shared motion vocabulary ---------- */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float-blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(3%, -4%) scale(1.06);
+  }
+  66% {
+    transform: translate(-3%, 3%) scale(0.96);
+  }
+}
+
+/* Respect reduced-motion preferences: kill decorative animation, keep
+   instant state changes working. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
