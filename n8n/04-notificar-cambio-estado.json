@@ -1,0 +1,63 @@
+{
+  "name": "04 - Notificar cambio de estado al cliente",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "estado-pedido",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "e1f2a3b4-c5d6-4e7f-8091-a2b3c4d5e601",
+      "name": "Webhook cambio de estado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-400, 300],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REPLACE_ME", "name": "Zorva Webhook Secret" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\n\nconst mapa = {\n  pendiente: 'quedo pendiente de confirmacion',\n  confirmado: 'fue confirmado y ya lo estamos alistando',\n  en_preparacion: 'se esta preparando',\n  despachado: 'ya salio para entrega',\n  entregado: 'fue entregado, gracias por tu compra',\n  cancelado: 'fue cancelado'\n};\nconst emojis = {\n  pendiente: '🕐',\n  confirmado: '✅',\n  en_preparacion: '👨‍🍳',\n  despachado: '🚚',\n  entregado: '📦',\n  cancelado: '❌'\n};\n\nreturn [{\n  json: {\n    numero_whatsapp: body.numero_whatsapp,\n    texto: `${emojis[body.estado] || 'ℹ️'} Tu pedido #${body.pedido_id} ${mapa[body.estado] || body.estado}. Total: $${body.total}.`\n  }\n}];"
+      },
+      "id": "e1f2a3b4-c5d6-4e7f-8091-a2b3c4d5e602",
+      "name": "Formatear notificacion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-160, 300]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1169027299621892",
+        "recipientPhoneNumber": "={{ $json.numero_whatsapp }}",
+        "textBody": "={{ $json.texto }}",
+        "additionalFields": {}
+      },
+      "id": "e1f2a3b4-c5d6-4e7f-8091-a2b3c4d5e603",
+      "name": "Enviar notificacion WhatsApp",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [80, 300],
+      "credentials": {
+        "whatsAppApi": { "id": "REPLACE_ME", "name": "WhatsApp Zorva" }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook cambio de estado": {
+      "main": [
+        [{ "node": "Formatear notificacion", "type": "main", "index": 0 }]
+      ]
+    },
+    "Formatear notificacion": {
+      "main": [
+        [{ "node": "Enviar notificacion WhatsApp", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

@@ -1,0 +1,127 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 20 * * *"
+            }
+          ]
+        }
+      },
+      "id": "d72e82f2-9606-423a-b809-08b63b71d020",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://zorva-production.up.railway.app/api/dashboard/resumen-diario",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "a2b4e753-ec1d-4f25-b7c7-f2aaf4af311e",
+      "name": "Pedir resumen diario",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1376,
+        32
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "3UHXo3iRpxpqTK7Q",
+          "name": "N8N API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst canales = Object.entries(r.pedidos_por_canal || {})\n  .map(([canal, cant]) => `${canal}: ${cant}`)\n  .join(', ');\n\nreturn [{\n  json: {\n    texto: `Resumen ${r.fecha}: $${r.total_ventas_dia} en ventas, ${r.pedidos_totales} pedidos (${canales}). Producto estrella: ${r.producto_estrella}.`\n  }\n}];"
+      },
+      "id": "839208af-ef3e-423c-862c-75f53555b724",
+      "name": "Formatear mensaje resumen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1632,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "recipientPhoneNumber": "573202529713",
+        "textBody": "={{ $json.texto }}",
+        "additionalFields": {}
+      },
+      "id": "a124fc25-777f-46ed-bfde-93a054680d33",
+      "name": "Enviar resumen por WhatsApp",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        32
+      ],
+      "webhookId": "8b172a7a-a60b-4309-98d4-7b21ab23a7d0",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "uNKVbI9cc3VHX8lK",
+          "name": "WhatsApp account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Pedir resumen diario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pedir resumen diario": {
+      "main": [
+        [
+          {
+            "node": "Formatear mensaje resumen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear mensaje resumen": {
+      "main": [
+        [
+          {
+            "node": "Enviar resumen por WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2798732de996d635bfd56c094efd4e66855729a2bc4df143911cf102d30ebf26"
+  }
+}
