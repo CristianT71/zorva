@@ -1,22 +1,33 @@
-<div class="backdrop" (click)="onBackdrop($event)">
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="modal__head">
-      <h2 class="modal__title">{{ isEdit() ? 'Editar Producto' : 'Crear Producto' }}</h2>
-      <button class="modal__close" (click)="close()" aria-label="Cerrar">
+<div
+  class="fixed inset-0 z-[200] grid place-items-center bg-black/70 backdrop-blur-md p-5 animate-[fade-in_0.2s_ease]"
+  (click)="onBackdrop($event)"
+>
+  <div
+    role="dialog"
+    aria-modal="true"
+    class="w-full max-w-[480px] overflow-hidden rounded-2xl border border-accent/20 bg-gradient-to-br from-white/[0.06] to-white/[0.015] backdrop-blur-2xl shadow-2xl shadow-black/60 [box-shadow:0_1px_0_0_rgba(255,255,255,0.06)_inset,0_24px_60px_rgba(0,0,0,0.6),0_0_40px_-12px_rgba(37,99,235,0.25)] animate-[scale-in_0.25s_cubic-bezier(0.16,1,0.3,1)]"
+  >
+    <div class="flex items-center justify-between border-b border-white/10 px-6 py-5">
+      <h2 class="text-[17px] font-bold text-slate-100">{{ isEdit() ? 'Editar Producto' : 'Crear Producto' }}</h2>
+      <button
+        class="grid h-[34px] w-[34px] place-items-center rounded-lg border border-white/10 text-slate-400 transition-all duration-150 hover:border-white/20 hover:text-slate-100 hover:rotate-90"
+        (click)="close()"
+        aria-label="Cerrar"
+      >
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M18 6 6 18M6 6l12 12" />
         </svg>
       </button>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="modal__body" novalidate>
-      <div class="field">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="px-6 pb-6 pt-[22px]" novalidate>
+      <div class="mb-4">
         <label class="field-label">Nombre</label>
         <input class="input" type="text" formControlName="nombre" placeholder="Nombre del producto" />
       </div>
 
-      <div class="grid-2">
-        <div class="field">
+      <div class="mb-4 grid grid-cols-2 gap-3.5 max-[520px]:grid-cols-1">
+        <div>
           <label class="field-label">Categoría</label>
           <select class="input" formControlName="categoria_id">
             <option [ngValue]="null" disabled>Selecciona…</option>
@@ -26,29 +37,29 @@
           </select>
         </div>
 
-        <div class="field">
+        <div>
           <label class="field-label">Unidad de medida</label>
           <input class="input" type="text" formControlName="unidad_medida" placeholder="ej. unidad, kg" />
         </div>
       </div>
 
-      <div class="field">
+      <div class="mb-4">
         <label class="field-label">Precio (COP)</label>
         <input class="input" type="number" formControlName="precio" min="0" placeholder="0" />
       </div>
 
-      <div class="grid-2">
-        <div class="field">
+      <div class="mb-4 grid grid-cols-2 gap-3.5 max-[520px]:grid-cols-1">
+        <div>
           <label class="field-label">Stock actual</label>
           <input class="input" type="number" formControlName="stock_actual" min="0" />
         </div>
-        <div class="field">
+        <div>
           <label class="field-label">Stock mínimo</label>
           <input class="input" type="number" formControlName="stock_minimo" min="0" />
         </div>
       </div>
 
-      <div class="modal__actions">
+      <div class="mt-6 flex justify-end gap-3">
         <button type="button" class="btn btn-ghost" (click)="close()">Cancelar</button>
         <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
           @if (saving()) {

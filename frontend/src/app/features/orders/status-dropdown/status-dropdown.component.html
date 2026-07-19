@@ -1,22 +1,34 @@
-<div class="dropdown">
+<div class="relative inline-block">
   <button
-    class="trigger pill"
+    class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-xs font-semibold leading-[1.4] font-sans cursor-pointer transition-colors duration-150"
     [style.color]="current().color"
     [style.background]="current().color + '1f'"
     [style.border-color]="current().color + '55'"
     (click)="toggle()"
   >
     {{ current().label }}
-    <svg class="chevron" [class.chevron--up]="open()" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+    <svg
+      class="transition-transform duration-150"
+      [class.rotate-180]="open()"
+      viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
+    >
       <path d="m6 9 6 6 6-6" />
     </svg>
   </button>
 
   @if (open()) {
-    <div class="menu">
+    <div
+      class="absolute top-[calc(100%+6px)] right-0 z-[100] min-w-[180px] origin-top-right rounded-xl border border-accent/20 p-1.5 shadow-2xl shadow-black/50"
+      style="background-color: rgba(23, 23, 32, 0.94); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); animation: scale-in 0.16s cubic-bezier(0.16, 1, 0.3, 1);"
+    >
       @for (opt of options; track opt.value) {
-        <button class="menu__item" (click)="select(opt.value)" [class.menu__item--active]="opt.value === estado()">
-          <span class="menu__dot" [style.background]="opt.color"></span>
+        <button
+          class="flex w-full items-center gap-2.5 rounded-md border-none bg-transparent px-2.5 py-2 text-left text-[13px] font-medium text-slate-400 transition-all duration-150 hover:translate-x-0.5 hover:bg-white/5 hover:text-slate-100"
+          [class.bg-white/5]="opt.value === estado()"
+          [class.text-slate-100]="opt.value === estado()"
+          (click)="select(opt.value)"
+        >
+          <span class="h-2 w-2 flex-shrink-0 rounded-full" [style.background]="opt.color"></span>
           {{ opt.label }}
         </button>
       }

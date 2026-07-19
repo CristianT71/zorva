@@ -28,8 +28,9 @@
 }
 
 .table-card {
+  @include ui.card-accent-glow();
   padding: 8px 20px;
-  overflow: visible; // let the status menu escape the card
+  overflow: visible; // let the status menu escape the card -- overrides the mixin's overflow:hidden
   transition: box-shadow $dur-base $ease-out;
 }
 
