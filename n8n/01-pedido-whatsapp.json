@@ -1,0 +1,1474 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "id": "87f0eb97-5528-40d7-a287-0aaae12732b8",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -9088,
+        384
+      ],
+      "webhookId": "ef33c9e7-0fbe-40c6-8150-281c1aafcf18",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "zrEr0ZXjidp34vNC",
+          "name": "WhatsApp OAuth account-Alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json;\nconst value = body.entry?.[0]?.changes?.[0]?.value;\nconst message = body.messages?.[0] || value?.messages?.[0];\n\nif (!message) {\n  // Es un callback de estado (entregado/leido), no un mensaje nuevo. Se ignora.\n  return [];\n}\n\nconst contact = body.contacts?.[0] || value?.contacts?.[0];\n\nreturn [{\n  json: {\n    numero_whatsapp: message.from,\n    nombre: contact?.profile?.name || message.from,\n    tipo: message.type,\n    texto: message.text?.body || '',\n    boton_id: message.interactive?.button_reply?.id || message.interactive?.list_reply?.id || null\n  }\n}];"
+      },
+      "id": "0400182b-aea2-4640-a4e0-adf73be29d6c",
+      "name": "Normalizar evento entrante",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -8800,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "t1",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "t2",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "interactive",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Boton"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d217d67e-1776-4988-8435-f01e9fc93f83",
+      "name": "Texto o boton",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -8544,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT numero_whatsapp, items_json FROM carritos_temporales WHERE numero_whatsapp = '{{ $json.numero_whatsapp }}';",
+        "options": {}
+      },
+      "id": "d3f1a2b4-6e7c-4a1e-9f3d-1a2b3c4d5e05",
+      "name": "Leer contexto previo",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "alwaysOutputData": true,
+      "position": [
+        -8416,
+        128
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "pBQIdzO3troPrEUP",
+          "name": "Postgres Railway"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const previo = $('Normalizar evento entrante').first().json;\nconst fila = $input.first().json;\nconst ctx = fila && fila.items_json ? fila.items_json : null;\n\nlet contexto_texto = '';\nconst validos_previos = ctx?.items_validos || [];\nconst faltantes_previos = ctx?.items_no_disponibles || [];\n\nif (validos_previos.length || faltantes_previos.length) {\n  const partes = [];\n  if (validos_previos.length) {\n    partes.push('Productos que el cliente ya confirmo en este pedido: ' + validos_previos.map(i => `${i.cantidad} x ${i.nombre}`).join(', '));\n  }\n  if (faltantes_previos.length) {\n    partes.push('Productos que el cliente pidio pero NO habia stock suficiente (le ofrecimos la cantidad disponible): ' + faltantes_previos.map(i => `${i.nombre} (pidio ${i.cantidad_pedida}, solo hay ${i.disponible})`).join(', '));\n  }\n  contexto_texto = 'CONTEXTO_PREVIO_DE_LA_CONVERSACION: ' + partes.join('. ') + '. Si el mensaje del cliente es una respuesta corta o ambigua relacionada con esto (ej. \"dame los que hay\", \"esos 8\", \"si, esos\", \"dale con eso\"), usa este contexto para deducir el producto y la cantidad exactos en vez de dejar productos vacio.';\n}\n\nreturn [{\n  json: {\n    ...previo,\n    contexto_texto,\n    contexto_items_validos_previos: validos_previos\n  }\n}];"
+      },
+      "id": "d3f1a2b4-6e7c-4a1e-9f3d-1a2b3c4d5e06",
+      "name": "Preparar contexto IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -8352,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Eres el asistente virtual de un supermercado colombiano por WhatsApp. Eres una persona real y cercana, no un robot: hablas calido, amable y natural, usas emojis con moderacion cuando encajan (😊🛒✅📦), saludas segun corresponda si te saludan (buenos dias/tardes/noches), te despides con cariño si se despiden, agradeces si te dan las gracias, y si el cliente comenta algo casual o pregunta algo fuera de lo tipico puedes responder con naturalidad y simpatia - no estas limitado a una sola funcion robotica, eres un vendedor de confianza que ademas sabe vender. Los clientes escriben de mil formas distintas: \"frijol x2\", \"2 frijoles\", \"dame dos libras de frijol\", \"quiero frijol\", con errores de tipeo, sin tildes, mezclando varios productos en una sola frase, usando numeros en palabras (dos, tres, media docena, una docena) o en digitos. Entiende la intencion real sin importar como este escrito, igual que lo haria una persona. Nunca inventes datos de stock, precios o pedidos reales - esos te los doy yo despues; tu solo entiendes al cliente y, cuando aplique, redactas.\n\nResponde SIEMPRE Y SOLO con JSON valido, sin texto adicional antes o despues, exactamente con esta forma:\n{\"intencion\": \"crear_pedido\" | \"consultar_estado\" | \"otro\", \"productos\": [{\"nombre\": string, \"cantidad\": number}], \"respuesta\": string}\n\nReglas:\n- \"crear_pedido\": el cliente quiere comprar, agregar o ajustar uno o mas productos. Extrae nombre y cantidad de cada uno, incluso si menciona varios en la misma frase (\"2 arroces y un frijol\" son dos productos distintos). Deja \"respuesta\" vacio (\"\"), porque esa parte la redacto yo despues con los datos reales de stock y precio.\n- Si no dice cantidad para un producto, asume cantidad 1.\n- Convierte numeros en palabras a digitos (dos=2, media docena=6, una docena=12, etc).\n- \"consultar_estado\": el cliente pregunta por el seguimiento de un pedido ya hecho (\"como va mi pedido\", \"ya me lo mandaron\", \"cuando llega\"). Deja \"respuesta\" vacio tambien, porque el estado real te lo doy yo despues.\n- \"otro\": saludos, agradecimientos, despedidas, charla casual, preguntas generales, o cualquier mensaje que no sea pedir productos ni consultar un pedido. AQUI SI llena \"respuesta\" con tu mensaje natural, calido, variado (no repitas siempre lo mismo) y con emojis si encajan. Si de verdad no entendiste que quiere el cliente, ofrece amablemente ayuda mencionando que puede pedir productos, preguntar por su pedido, o escribir \"menu\" para ver las opciones.\n- Si te doy un CONTEXTO_PREVIO_DE_LA_CONVERSACION y el mensaje del cliente es una respuesta corta o ambigua relacionada (ej. \"dame los que hay\", \"esos 8\", \"si\", \"dale\"), usa ese contexto para deducir el producto y la cantidad correctos - no devuelvas productos vacio si el contexto deja claro a que se refiere."
+            },
+            {
+              "role": "system",
+              "content": "={{ $json.contexto_texto }}"
+            },
+            {
+              "content": "={{ $json.texto }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "75fcc0f4-bb08-4808-bb81-6da41c1efb29",
+      "name": "Message a model",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -8288,
+        32
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "PUvL3XomHu6WKdkq",
+          "name": "OpenAI account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const previo = $('Preparar contexto IA').first().json;\nconst raw = $input.first().json;\n\nlet content =\n  raw.output?.[0]?.content?.[0]?.text ??\n  raw.choices?.[0]?.message?.content ??\n  raw.message?.content ??\n  raw.content ??\n  raw.text ??\n  (typeof raw === 'string' ? raw : JSON.stringify(raw));\n\ncontent = String(content)\n  .trim()\n  .replace(/^```json\\s*/i, '')\n  .replace(/^```\\s*/, '')\n  .replace(/```\\s*$/, '')\n  .trim();\n\nlet parsed;\nlet parseError = null;\ntry {\n  parsed = JSON.parse(content);\n} catch (e) {\n  parsed = { intencion: 'otro', productos: [] };\n  parseError = e.message;\n}\n\nreturn [{\n  json: {\n    numero_whatsapp: previo.numero_whatsapp,\n    nombre: previo.nombre,\n    texto: previo.texto,\n    intencion: parsed.intencion || 'otro',\n    productos: parsed.productos || [],\n    respuesta: parsed.respuesta || 'Cuentame en que te puedo ayudar: puedes pedir productos, preguntar por tu pedido, o escribir \"menu\" para ver las opciones 😊',\n    contexto_items_validos_previos: previo.contexto_items_validos_previos || [],\n    _debug_texto_original: previo.texto,\n    _debug_respuesta_ia: content,\n    _debug_parse_error: parseError\n  }\n}];"
+      },
+      "id": "4da5773d-64b0-42e9-848b-f29441cd0087",
+      "name": "Parsear respuesta IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -8032,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "i1",
+                    "leftValue": "={{ $json.intencion }}",
+                    "rightValue": "otro",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "otro"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "i2",
+                    "leftValue": "={{ $json.intencion }}",
+                    "rightValue": "consultar_estado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "consultar_estado"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "i3",
+                    "leftValue": "={{ $json.intencion }}",
+                    "rightValue": "crear_pedido",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "crear_pedido"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "696adcb0-9c0b-4c78-a07f-aab9959a8b24",
+      "name": "Enrutar por intencion",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -7760,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "m1",
+              "leftValue": "={{ $json.texto }}",
+              "rightValue": "menu",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "m2",
+              "leftValue": "={{ $json.texto }}",
+              "rightValue": "opcion",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "m3",
+              "leftValue": "={{ $json.texto }}",
+              "rightValue": "ayuda",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "d3f1a2b4-6e7c-4a1e-9f3d-1a2b3c4d5e08",
+      "name": "Pide el menu",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -7504,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v19.0/1169027299621892/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { messaging_product: 'whatsapp', to: $json.numero_whatsapp, type: 'interactive', interactive: { type: 'list', body: { text: 'Claro! Estas son tus opciones:' }, action: { button: 'Ver opciones', sections: [ { title: 'Menu principal', rows: [ { id: 'menu_pedido', title: 'Hacer un pedido', description: 'Dime que productos y cantidades quieres' }, { id: 'menu_estado', title: 'Consultar mi pedido', description: 'Revisa el estado de tu ultimo pedido' }, { id: 'menu_catalogo', title: 'Ver catalogo', description: 'Mira los productos disponibles' } ] } ] } } } }}",
+        "options": {}
+      },
+      "id": "62d5d024-a2b2-48a1-b38f-44f822c458d5",
+      "name": "Mostrar menu principal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -7248,
+        -320
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HJYGI22iVkDYiuom",
+          "name": "WhatsApp account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1169027299621892",
+        "recipientPhoneNumber": "={{ $json.numero_whatsapp }}",
+        "textBody": "={{ $json.respuesta }}",
+        "additionalFields": {}
+      },
+      "id": "d3f1a2b4-6e7c-4a1e-9f3d-1a2b3c4d5e09",
+      "name": "Responder charla",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -7248,
+        -176
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HJYGI22iVkDYiuom",
+          "name": "WhatsApp account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://zorva-production.up.railway.app/api/pedidos/estado-whatsapp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "numero_whatsapp",
+              "value": "={{ $json.numero_whatsapp }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "137bbb6c-37a6-485c-b2a7-02e7be6e3ce6",
+      "name": "Consultar estado pedido",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -7504,
+        32
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "3UHXo3iRpxpqTK7Q",
+          "name": "N8N API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Eres el asistente de un supermercado colombiano por WhatsApp, calido, amable y natural, usas emojis con moderacion (😊📦✅🚚). Te voy a dar el estado real de un pedido de un cliente (estado, total y fecha). Redacta un mensaje breve, claro y amigable contandole como va su pedido, usando EXACTAMENTE esos datos, sin inventar nada mas. Los estados posibles y como explicarlos: pendiente=esta pendiente de confirmacion, confirmado=fue confirmado y ya lo estamos alistando, en_preparacion=se esta preparando, despachado=ya salio para entrega, entregado=ya fue entregado, cancelado=fue cancelado. Responde SOLO con el texto del mensaje para el cliente, sin comillas ni JSON ni explicaciones adicionales."
+            },
+            {
+              "content": "={{ 'Estado: ' + $json.estado + '. Total: $' + $json.total + '. Fecha del pedido: ' + $json.fecha }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "031701ef-686a-4281-b440-7563c16e1a25",
+      "name": "Redactar respuesta estado",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -7248,
+        32
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "PUvL3XomHu6WKdkq",
+          "name": "OpenAI account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const previo = $('Normalizar evento entrante').first().json;\nconst raw = $input.first().json;\n\nconst texto =\n  raw.output?.[0]?.content?.[0]?.text ??\n  raw.choices?.[0]?.message?.content ??\n  raw.message?.content ??\n  raw.content ??\n  raw.text ??\n  (typeof raw === 'string' ? raw : JSON.stringify(raw));\n\nreturn [{\n  json: {\n    numero_whatsapp: previo.numero_whatsapp,\n    texto_respuesta: String(texto).trim()\n  }\n}];"
+      },
+      "id": "d3f1a2b4-6e7c-4a1e-9f3d-1a2b3c4d5e10",
+      "name": "Extraer respuesta estado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7040,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1169027299621892",
+        "recipientPhoneNumber": "={{ $json.numero_whatsapp }}",
+        "textBody": "={{ $json.texto_respuesta }}",
+        "additionalFields": {}
+      },
+      "id": "73010706-69f0-4336-b6ff-8190d6d013cb",
+      "name": "Responder estado",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -6992,
+        32
+      ],
+      "webhookId": "286c9d20-3453-4ab9-8aea-356b99258d75",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HJYGI22iVkDYiuom",
+          "name": "WhatsApp account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const previo = $input.first().json;\nconst backendUrl = 'https://zorva-production.up.railway.app/api';\nconst productos = previo.productos || [];\n\nconst items_validos = [...(previo.contexto_items_validos_previos || [])];\nconst items_no_disponibles = [];\n\nfor (const p of productos) {\n  const resultado = await this.helpers.httpRequest({\n    method: 'GET',\n    url: `${backendUrl}/productos`,\n    qs: { search: p.nombre },\n    json: true\n  });\n  const match = resultado[0];\n\n  if (!match || match.stock_actual < p.cantidad) {\n    items_no_disponibles.push({\n      nombre: p.nombre,\n      cantidad_pedida: p.cantidad,\n      disponible: match ? match.stock_actual : 0\n    });\n  } else {\n    const item = {\n      producto_id: match.id,\n      nombre: match.nombre,\n      cantidad: p.cantidad,\n      precio_unitario: match.precio,\n      subtotal: match.precio * p.cantidad\n    };\n    const idx = items_validos.findIndex(i => i.producto_id === match.id);\n    if (idx >= 0) items_validos[idx] = item; else items_validos.push(item);\n  }\n}\n\nreturn [{\n  json: {\n    numero_whatsapp: previo.numero_whatsapp,\n    nombre: previo.nombre,\n    items_validos,\n    items_no_disponibles,\n    todo_disponible: items_no_disponibles.length === 0 && items_validos.length > 0\n  }\n}];"
+      },
+      "id": "63052ad2-a48f-4649-8125-57810aace60f",
+      "name": "Buscar y validar productos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7504,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "d1",
+              "leftValue": "={{ $json.todo_disponible }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2c0c962-c3ed-4ac3-8345-ec34fedb581b",
+      "name": "Todo disponible",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -7248,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO carritos_temporales (numero_whatsapp, items_json) VALUES ('{{ $json.numero_whatsapp }}', '{{ JSON.stringify({ items_validos: $json.items_validos, items_no_disponibles: $json.items_no_disponibles }).replace(/'/g, `''`) }}'::jsonb) ON CONFLICT (numero_whatsapp) DO UPDATE SET items_json = EXCLUDED.items_json, creado_en = now() RETURNING numero_whatsapp, items_json;",
+        "options": {}
+      },
+      "id": "d3f1a2b4-6e7c-4a1e-9f3d-1a2b3c4d5e07",
+      "name": "Guardar contexto pendiente",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -6992,
+        60
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "pBQIdzO3troPrEUP",
+          "name": "Postgres Railway"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $input.first().json;\nconst ctx = row.items_json;\nconst items_validos = ctx.items_validos || [];\nconst items_no_disponibles = ctx.items_no_disponibles || [];\n\nconst avisos = items_no_disponibles\n  .map(i => `De *${i.nombre}* solo me quedan ${i.disponible} ${i.disponible === 1 ? 'unidad' : 'unidades'} (pediste ${i.cantidad_pedida}). Si te sirven, dime \"dame los ${i.disponible} de ${i.nombre}\", o cambia el producto.`)\n  .join('\\n\\n');\n\nconst confirmados = items_validos.length\n  ? `Hasta ahora tengo confirmado: ${items_validos.map(i => `${i.cantidad} x ${i.nombre}`).join(', ')}.\\n\\n`\n  : '';\n\nreturn [{\n  json: {\n    numero_whatsapp: row.numero_whatsapp,\n    texto_respuesta: `${confirmados}${avisos}`\n  }\n}];"
+      },
+      "id": "c34002a3-62aa-4acf-8b3c-e29778d3493d",
+      "name": "Formatear faltantes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6720,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1169027299621892",
+        "recipientPhoneNumber": "={{ $json.numero_whatsapp }}",
+        "textBody": "={{ $json.texto_respuesta }}",
+        "additionalFields": {}
+      },
+      "id": "7688d1a4-a840-45b2-b0ee-5153a62ed104",
+      "name": "Responder faltantes",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -6720,
+        128
+      ],
+      "webhookId": "9bf06ded-aaf0-4eaa-891d-4601e60906f1",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HJYGI22iVkDYiuom",
+          "name": "WhatsApp account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO carritos_temporales (numero_whatsapp, items_json) VALUES ('{{ $json.numero_whatsapp }}', '{{ JSON.stringify({ items_validos: $json.items_validos, items_no_disponibles: [] }).replace(/'/g, `''`) }}'::jsonb) ON CONFLICT (numero_whatsapp) DO UPDATE SET items_json = EXCLUDED.items_json, creado_en = now() RETURNING numero_whatsapp, items_json;",
+        "options": {}
+      },
+      "id": "888c55a7-13f3-45a0-be76-ff783f0b3a7b",
+      "name": "Guardar carrito",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -6992,
+        336
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "pBQIdzO3troPrEUP",
+          "name": "Postgres Railway"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $input.first().json;\nconst items = row.items_json.items_validos || [];\nconst total = items.reduce((acc, i) => acc + i.subtotal, 0);\nconst lineas = items.map(i => `- ${i.cantidad} x ${i.nombre}: $${i.subtotal}`).join('\\n');\n\nreturn [{\n  json: {\n    numero_whatsapp: row.numero_whatsapp,\n    texto_resumen: `Este es tu pedido 🛒:\\n${lineas}\\n\\nTotal: $${total}\\n\\n¿Lo confirmamos?`\n  }\n}];"
+      },
+      "id": "b3cc5a78-fbdf-4b14-8553-fc1cb41d6307",
+      "name": "Formatear resumen y botones",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6720,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v19.0/1169027299621892/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { messaging_product: 'whatsapp', to: $json.numero_whatsapp, type: 'interactive', interactive: { type: 'button', body: { text: $json.texto_resumen }, action: { buttons: [ { type: 'reply', reply: { id: 'confirmar', title: 'Confirmar' } }, { type: 'reply', reply: { id: 'agregar_mas', title: 'Agregar mas' } }, { type: 'reply', reply: { id: 'cancelar', title: 'Cancelar' } } ] } } } }}",
+        "options": {}
+      },
+      "id": "2722f117-2e5e-4c1b-a0b5-a7de1e7c62a0",
+      "name": "Enviar mensaje interactivo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -6464,
+        336
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HJYGI22iVkDYiuom",
+          "name": "WhatsApp account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "b1",
+                    "leftValue": "={{ $json.boton_id }}",
+                    "rightValue": "confirmar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "confirmar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "b2",
+                    "leftValue": "={{ $json.boton_id }}",
+                    "rightValue": "agregar_mas",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "agregar_mas"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "b3",
+                    "leftValue": "={{ $json.boton_id }}",
+                    "rightValue": "cancelar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cancelar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "b4",
+                    "leftValue": "={{ $json.boton_id }}",
+                    "rightValue": "menu_pedido",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "menu_pedido"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "b5",
+                    "leftValue": "={{ $json.boton_id }}",
+                    "rightValue": "menu_estado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "menu_estado"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "b6",
+                    "leftValue": "={{ $json.boton_id }}",
+                    "rightValue": "menu_catalogo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "menu_catalogo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4112eae9-45be-4fab-bbfc-dd417eaecfc2",
+      "name": "Enrutar por boton",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -8288,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT numero_whatsapp, items_json FROM carritos_temporales WHERE numero_whatsapp = '{{ $json.numero_whatsapp }}';",
+        "options": {}
+      },
+      "id": "153113cf-354a-4452-bfe6-1745aa3e0470",
+      "name": "Leer carrito",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -8032,
+        576
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "pBQIdzO3troPrEUP",
+          "name": "Postgres Railway"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $input.first().json;\n\nreturn [{\n  json: {\n    numero_whatsapp: row.numero_whatsapp,\n    body: {\n      canal_origen: 'whatsapp',\n      cliente_whatsapp: { numero_whatsapp: row.numero_whatsapp, nombre: row.numero_whatsapp },\n      items: (row.items_json.items_validos || []).map(i => ({ producto_id: i.producto_id, cantidad: i.cantidad }))\n    }\n  }\n}];"
+      },
+      "id": "d16f7b39-ddfc-4c99-a8ad-c56cabf9aa2d",
+      "name": "Armar body pedido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7760,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://zorva-production.up.railway.app/api/pedidos",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "735611bd-2855-42a1-aab3-54917ebc27f8",
+      "name": "Crear pedido",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -7504,
+        576
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "3UHXo3iRpxpqTK7Q",
+          "name": "N8N API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM carritos_temporales WHERE numero_whatsapp = '{{ $json.cliente.numero_whatsapp }}';",
+        "options": {}
+      },
+      "id": "7d1f5a36-7145-46e3-ae90-dbdb27ba9bd5",
+      "name": "Borrar carrito",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -7248,
+        576
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "pBQIdzO3troPrEUP",
+          "name": "Postgres Railway"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const pedido = $('Crear pedido').first().json;\n\nreturn [{\n  json: {\n    numero_whatsapp: pedido.cliente.numero_whatsapp,\n    texto_respuesta: `¡Listo! ✅ Tu pedido #${pedido.id} quedo registrado, total $${pedido.total}. ¡Gracias por tu compra! 🛒`\n  }\n}];"
+      },
+      "id": "ef175411-ab0c-4cfb-b5d7-4290e35c551a",
+      "name": "Formatear confirmacion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6992,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1169027299621892",
+        "recipientPhoneNumber": "={{ $json.numero_whatsapp }}",
+        "textBody": "={{ $json.texto_respuesta }}",
+        "additionalFields": {}
+      },
+      "id": "0e9484cd-c638-41ca-a003-bb027d42d9b0",
+      "name": "Responder confirmacion",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -6720,
+        576
+      ],
+      "webhookId": "0d699f22-95b8-4d9c-8f35-8cab7a6449df",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HJYGI22iVkDYiuom",
+          "name": "WhatsApp account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1169027299621892",
+        "recipientPhoneNumber": "={{ $json.numero_whatsapp }}",
+        "textBody": "Dale, ¿que mas quieres agregar? 🛒",
+        "additionalFields": {}
+      },
+      "id": "fa545988-7b87-4d85-9790-d2fd61600dc1",
+      "name": "Responder agregar mas",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -8032,
+        784
+      ],
+      "webhookId": "6929f252-0d60-44f2-b430-da7ecbc98376",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HJYGI22iVkDYiuom",
+          "name": "WhatsApp account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM carritos_temporales WHERE numero_whatsapp = '{{ $json.numero_whatsapp }}';",
+        "options": {}
+      },
+      "id": "72bbd208-af6d-41f7-be34-646fce60087d",
+      "name": "Borrar carrito cancelar",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -8032,
+        928
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "pBQIdzO3troPrEUP",
+          "name": "Postgres Railway"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1169027299621892",
+        "recipientPhoneNumber": "={{ $('Normalizar evento entrante').first().json.numero_whatsapp }}",
+        "textBody": "Tu pedido fue cancelado 👍. Si quieres hacer otro cuando quieras, aqui estoy.",
+        "additionalFields": {}
+      },
+      "id": "b5673e56-5065-4f26-bac4-a65baabe34d7",
+      "name": "Responder cancelado",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -7760,
+        928
+      ],
+      "webhookId": "92ca3fb6-46f7-40b3-a105-fe0afdd80687",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HJYGI22iVkDYiuom",
+          "name": "WhatsApp account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1169027299621892",
+        "recipientPhoneNumber": "={{ $json.numero_whatsapp }}",
+        "textBody": "🛒 Dime que producto y cantidad quieres pedir",
+        "additionalFields": {}
+      },
+      "id": "d3f1a2b4-6e7c-4a1e-9f3d-1a2b3c4d5e01",
+      "name": "Pedir productos",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -8032,
+        1080
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HJYGI22iVkDYiuom",
+          "name": "WhatsApp account-alejo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://zorva-production.up.railway.app/api/productos",
+        "options": {}
+      },
+      "id": "d3f1a2b4-6e7c-4a1e-9f3d-1a2b3c4d5e02",
+      "name": "Consultar catalogo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -7760,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(i => i.json);\nconst productos = Array.isArray(items[0]) ? items[0] : items;\n\nconst porCategoria = {};\nfor (const p of productos) {\n  const cat = p.categoria?.nombre || 'Otros';\n  if (!porCategoria[cat]) porCategoria[cat] = [];\n  porCategoria[cat].push(`- ${p.nombre}: $${p.precio} (${p.unidad_medida})`);\n}\n\nconst secciones = Object.entries(porCategoria)\n  .map(([cat, lineas]) => `*${cat}*\\n${lineas.join('\\n')}`)\n  .join('\\n\\n');\n\nconst previo = $('Normalizar evento entrante').first().json;\n\nreturn [{\n  json: {\n    numero_whatsapp: previo.numero_whatsapp,\n    texto_catalogo: `Nuestro catalogo:\\n\\n${secciones}`\n  }\n}];"
+      },
+      "id": "d3f1a2b4-6e7c-4a1e-9f3d-1a2b3c4d5e03",
+      "name": "Formatear catalogo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7504,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1169027299621892",
+        "recipientPhoneNumber": "={{ $json.numero_whatsapp }}",
+        "textBody": "={{ $json.texto_catalogo }}",
+        "additionalFields": {}
+      },
+      "id": "d3f1a2b4-6e7c-4a1e-9f3d-1a2b3c4d5e04",
+      "name": "Responder catalogo",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -7248,
+        1080
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HJYGI22iVkDYiuom",
+          "name": "WhatsApp account-alejo"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalizar evento entrante",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar evento entrante": {
+      "main": [
+        [
+          {
+            "node": "Texto o boton",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Texto o boton": {
+      "main": [
+        [
+          {
+            "node": "Leer contexto previo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enrutar por boton",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer contexto previo": {
+      "main": [
+        [
+          {
+            "node": "Preparar contexto IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar contexto IA": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Parsear respuesta IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear respuesta IA": {
+      "main": [
+        [
+          {
+            "node": "Enrutar por intencion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrutar por intencion": {
+      "main": [
+        [
+          {
+            "node": "Pide el menu",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consultar estado pedido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar y validar productos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pide el menu": {
+      "main": [
+        [
+          {
+            "node": "Mostrar menu principal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder charla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar estado pedido": {
+      "main": [
+        [
+          {
+            "node": "Redactar respuesta estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redactar respuesta estado": {
+      "main": [
+        [
+          {
+            "node": "Extraer respuesta estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer respuesta estado": {
+      "main": [
+        [
+          {
+            "node": "Responder estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar y validar productos": {
+      "main": [
+        [
+          {
+            "node": "Todo disponible",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Todo disponible": {
+      "main": [
+        [
+          {
+            "node": "Guardar carrito",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Guardar contexto pendiente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar contexto pendiente": {
+      "main": [
+        [
+          {
+            "node": "Formatear faltantes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear faltantes": {
+      "main": [
+        [
+          {
+            "node": "Responder faltantes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar carrito": {
+      "main": [
+        [
+          {
+            "node": "Formatear resumen y botones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear resumen y botones": {
+      "main": [
+        [
+          {
+            "node": "Enviar mensaje interactivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrutar por boton": {
+      "main": [
+        [
+          {
+            "node": "Leer carrito",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder agregar mas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Borrar carrito cancelar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pedir productos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consultar estado pedido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consultar catalogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar catalogo": {
+      "main": [
+        [
+          {
+            "node": "Formatear catalogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear catalogo": {
+      "main": [
+        [
+          {
+            "node": "Responder catalogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer carrito": {
+      "main": [
+        [
+          {
+            "node": "Armar body pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar body pedido": {
+      "main": [
+        [
+          {
+            "node": "Crear pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear pedido": {
+      "main": [
+        [
+          {
+            "node": "Borrar carrito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Borrar carrito": {
+      "main": [
+        [
+          {
+            "node": "Formatear confirmacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear confirmacion": {
+      "main": [
+        [
+          {
+            "node": "Responder confirmacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Borrar carrito cancelar": {
+      "main": [
+        [
+          {
+            "node": "Responder cancelado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2798732de996d635bfd56c094efd4e66855729a2bc4df143911cf102d30ebf26"
+  }
+}
