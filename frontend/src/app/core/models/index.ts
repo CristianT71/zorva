@@ -71,6 +71,7 @@ export interface ProductoMasVendido {
 }
 
 export interface AiResponse {
+  respuesta_texto?: string;
   respuesta?: string;
   response?: string;
   message?: string;

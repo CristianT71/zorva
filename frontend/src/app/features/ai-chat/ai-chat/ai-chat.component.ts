@@ -97,7 +97,7 @@ export class AiChatComponent implements AfterViewChecked {
 
   private handleResponse(prompt: string, res: AiResponse): void {
     this.thinking.set(false);
-    const text = res?.respuesta || res?.response || res?.message || 'Sin respuesta.';
+    const text = res?.respuesta_texto || res?.respuesta || res?.response || res?.message || 'Sin respuesta.';
     this.push({ role: 'ai', text, html: this.renderMarkdown(text) });
     this.saveHistory(prompt, text);
     this.flagSuccess();

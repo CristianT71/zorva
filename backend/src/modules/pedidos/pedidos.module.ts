@@ -9,6 +9,7 @@ import { GetPedidosUseCase } from './application/use-cases/get-pedidos.use-case'
 import { UpdateEstadoPedidoUseCase } from './application/use-cases/update-estado-pedido.use-case';
 import { CLIENTE_REPOSITORY } from './domain/ports/cliente.repository.port';
 import { PEDIDO_REPOSITORY } from './domain/ports/pedido.repository.port';
+import { N8nNotificationService } from './infrastructure/adapters/n8n-notification.service';
 import { TypeormClienteRepository } from './infrastructure/adapters/typeorm-cliente.repository';
 import { TypeormPedidoRepository } from './infrastructure/adapters/typeorm-pedido.repository';
 import { PedidosController } from './infrastructure/controllers/pedidos.controller';
@@ -35,6 +36,7 @@ import { PedidoTypeormEntity } from './infrastructure/entities/pedido.typeorm-en
     GetPedidosUseCase,
     UpdateEstadoPedidoUseCase,
     GetEstadoWhatsappUseCase,
+    N8nNotificationService,
   ],
   exports: [PEDIDO_REPOSITORY],
 })
